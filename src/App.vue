@@ -14,9 +14,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import AwHeader from '@/components/public/Header.vue'
-import AwFooter from "@/components/public/Footer.vue";
-
 const router = useRouter()
 const headerTextColor = ref('#fff') // 默认字体颜色为白色
 
@@ -46,8 +43,6 @@ html, body {
 #app {
   height: 100vh; /* 确保根容器占满整个视口 */
 }
-
-/* 在线链接服务仅供平台体验和调试使用，平台不承诺服务的稳定性，企业客户需下载字体包自行发布使用并做好备份。 */
 /* 在线链接服务仅供平台体验和调试使用，平台不承诺服务的稳定性，企业客户需下载字体包自行发布使用并做好备份。 */
 @font-face {
   font-family: 'iconfont';  /* Project id 4742490 */
