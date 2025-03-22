@@ -74,8 +74,8 @@ const menuItems = ref([
     children: [{
       title: '仪表盘',
       icon: 'dashboard-icon',
-      path: '/dashboard', // 仪表盘也直接作为一个链接
-    },
+      path: '/dashboard' // 仪表盘也直接作为一个链接
+    }
     ] // 没有子菜单
   },
 
@@ -112,7 +112,7 @@ const menuItems = ref([
       {
         title: '商品分类',
         icon: 'category-icon',
-        path: '/products/categories'
+        path: '/shop/products/categories'
       },
       {
         title: '商品类型',

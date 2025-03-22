@@ -23,37 +23,13 @@
               </button>
               仪表盘
             </div>
-            <div class="user-avatar">
-              <img src="/api/placeholder/40/40" alt="user avatar" class="avatar-img" />
-            </div>
+<!--            <div class="user-avatar">-->
+<!--              <img src="/api/placeholder/40/40" alt="user avatar" class="avatar-img" />-->
+<!--            </div>-->
           </div>
 
           <!-- Dashboard Cards -->
           <div class="dashboard-cards">
-            <div class="card-section">
-              <div class="section-title">学习教程</div>
-              <div class="cards-container">
-                <div class="dashboard-card">
-                  <div class="card-title">学习教程</div>
-                  <div class="card-content">
-                    <a href="#" class="card-link">mall学习教程</a>
-                  </div>
-                </div>
-                <div class="dashboard-card">
-                  <div class="card-title">视频教程</div>
-                  <div class="card-content">
-                    <a href="#" class="card-link">mall视频教程（2023）</a>
-                  </div>
-                </div>
-                <div class="dashboard-card">
-                  <div class="card-title">点Star支持项目</div>
-                  <div class="card-content">
-                    <a href="#" class="card-link">mall项目</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <!-- Order and Sales Summary -->
             <div class="card-section">
               <div class="cards-container">
