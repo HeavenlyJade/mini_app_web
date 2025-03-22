@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import '@/assets/css/global.css'
 // scrollto from vue3 please see https://github.com/rigor789/vue-scrollto/issues/380
 import VueScrollTo from 'vue-scrollto'
 // element-plus

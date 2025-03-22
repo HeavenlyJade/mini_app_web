@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
+import MainLayout from '@/components/sidenav/MainLayout.vue' // 导入主布局组件
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -10,18 +11,27 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Login',
     component: () => import('@/views/Login.vue')
   },
+  // 使用MainLayout作为需要侧边栏的页面的父布局
   {
-    path: '/shop/products/categories',
-    name: 'shop_type',
-    component: () => import('@/views/shop/shop_prodect_type.vue')
-  },
-  {
-    path: '/home',
-    name: 'Home',
-    component: () => import('@/views/home.vue'),
-    meta: { requiresAuth: true } // 添加需要认证的标记
+    path: '/',
+    component: MainLayout,
+    meta: { requiresAuth: true }, // 整个布局需要认证
+    children: [
+      {
+        path: '/home',
+        name: 'Home',
+        component: () => import('@/views/index/index.vue'),
+        meta: { title: '首页' } // 添加页面标题，会显示在顶部栏
+      },
+      {
+        path: '/shop/products/categories',
+        name: 'shop_type',
+        component: () => import('@/views/shop/shop_prodect_type.vue'),
+        meta: { title: '商品分类' }
+      }
+      // 在这里添加其他需要使用侧边栏布局的路由
+    ]
   }
-  // 在此处添加其他需要认证的路由，都添加 meta: { requiresAuth: true }
 ]
 
 const router = createRouter({

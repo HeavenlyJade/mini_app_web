@@ -74,7 +74,7 @@ const menuItems = ref([
     children: [{
       title: '仪表盘',
       icon: 'dashboard-icon',
-      path: '/dashboard' // 仪表盘也直接作为一个链接
+      path: '/home' // 仪表盘也直接作为一个链接
     }
     ] // 没有子菜单
   },

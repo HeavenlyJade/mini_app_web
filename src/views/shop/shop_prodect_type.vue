@@ -1,14 +1,5 @@
 <template>
   <div class="category-list-container">
-    <SideNav class="side-nav-component" :is-collapsed="isNavCollapsed" />
-
-    <!-- Breadcrumb navigation -->
-    <div class="breadcrumb">
-      <!-- System notification -->
-      <div class="system-notice">
-      </div>
-    </div>
-
     <!-- Action toolbar -->
     <div class="toolbar">
       <el-select v-model="storeFilter" placeholder="门店" class="filter-item">
@@ -70,11 +61,9 @@
 </template>
 
 <script>
-import SideNav from '@/components/sidenav/SideNav.vue' // 导入 SideNav 组件
-
 export default {
   name: 'CategoryList',
-  data () {
+  data() {
     return {
       storeFilter: '',
       searchKeyword: '',
@@ -83,7 +72,7 @@ export default {
           id: '484674',
           name: '自主产品',
           type: '1\nindex',
-          icon: require('@/assets/img//classoc_case/img_2.png'),
+          icon: require('@/assets/img/classoc_case/img_2.png'),
           image: '',
           status: '正常'
         },
@@ -91,7 +80,7 @@ export default {
           id: '484675',
           name: '研发产品',
           type: '2',
-          icon: require('@/assets/img//classoc_case/img_2.png'),
+          icon: require('@/assets/img/classoc_case/img_2.png'),
           image: '',
           status: '正常'
         },
@@ -99,7 +88,7 @@ export default {
           id: '484676',
           name: '定制产品',
           type: '3',
-          icon: require('@/assets/img//classoc_case/img_2.png'),
+          icon: require('@/assets/img/classoc_case/img_2.png'),
           image: '',
           status: '正常'
         },
@@ -107,7 +96,7 @@ export default {
           id: '485083',
           name: '系列酒酒',
           type: '4',
-          icon: require('@/assets/img//classoc_case/img_2.png'),
+          icon: require('@/assets/img/classoc_case/img_2.png'),
           image: '',
           status: '正常'
         }
@@ -116,20 +105,19 @@ export default {
     }
   },
   methods: {
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    handleSearch () {
+    handleSearch() {
       // Implement search functionality
       console.log('Searching for:', this.searchKeyword)
     },
-    handleAdd () {
+    handleAdd() {
       // Navigate to add category page
       this.$router.push('/category/add')
     },
-    handleAddSub (row) {
+    handleAddSub(row) {
       // Navigate to add subcategory page with parent id
       this.$router.push(`/category/add?parentId=${row.id}`)
     },
-    handleEdit (row) {
+    handleEdit(row) {
       // Navigate to edit category page
       this.$router.push(`/category/edit/${row.id}`)
     },
@@ -193,14 +181,6 @@ export default {
   padding: 20px;
 }
 
-.breadcrumb {
-  margin-bottom: 20px;
-}
-
-.system-notice {
-  margin: 10px 0;
-}
-
 .toolbar {
   margin-bottom: 20px;
   display: flex;
@@ -217,12 +197,4 @@ export default {
   height: 40px;
   object-fit: contain;
 }
-
-.side-nav-component {
-  height: 100vh;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
 </style>
