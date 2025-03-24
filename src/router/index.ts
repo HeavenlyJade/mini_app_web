@@ -26,8 +26,31 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/shop/products/categories',
         name: 'shop_type',
-        component: () => import('@/views/shop/shop_prodect_type.vue'),
+        component: () => import('@/views/shop/shop_product_type.vue'),
         meta: { title: '商品分类' }
+      },
+      {
+        path: '/shop/products/categories/add',
+        name: 'shop_type_add',
+        component: () => import('@/views/shop/shop_product_type_add.vue'),
+        meta: { title: '商品分类添加' }
+      },
+      {
+        path: '/shop/products/list',
+        name: 'shop_product_list',
+        component: () => import('@/views/shop/merchandise/product_list.vue'),
+        meta: { title: '商品列表' }
+      },
+      {
+        path: '/shop/products/add',
+        name: 'shop_product_add',
+        component: () => import('@/views/shop/merchandise/product_add.vue'),
+        meta: { title: '商品列表新增' }
+      }, {
+        path: '/shop/products/specification_size',
+        name: 'specification_size',
+        component: () => import('@/views/shop/merchandise/specification_size.vue'),
+        meta: { title: '规格尺寸' }
       }
       // 在这里添加其他需要使用侧边栏布局的路由
     ]

@@ -102,12 +102,12 @@ const menuItems = ref([
       {
         title: '商品列表',
         icon: 'list-icon',
-        path: '/products/list'
+        path: '/shop/products/list'
       },
       {
         title: '添加商品',
         icon: 'add-icon',
-        path: '/products/add'
+        path: '/shop/products/add'
       },
       {
         title: '商品分类',
@@ -119,11 +119,16 @@ const menuItems = ref([
         icon: 'type-icon',
         path: '/products/types'
       },
-      {
-        title: '品牌管理',
-        icon: 'brand-icon',
-        path: '/products/brands'
-      }
+            {
+        title: '规格尺寸',
+        icon: 'type-icon',
+        path: '/shop/products/specification_size'
+      },
+      // {
+      //   title: '品牌管理',
+      //   icon: 'brand-icon',
+      //   path: '/products/brands'
+      // }
     ]
   },
   {

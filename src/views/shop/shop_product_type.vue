@@ -38,19 +38,19 @@
         </template>
       </el-table-column>
       <el-table-column label="图片" width="120">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <img :src="scope.row.image" v-if="scope.row.image" class="category-image">
           <span v-else>-</span>
         </template>
       </el-table-column>
       <el-table-column prop="status" label="状态" width="100">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-tag type="success" v-if="scope.row.status === '正常'">正常</el-tag>
           <el-tag type="info" v-else>停用</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="220">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-button type="success" size="mini" @click="handleAddSub(scope.row)">添加</el-button>
           <el-button type="primary" size="mini" @click="handleEdit(scope.row)">编辑</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
@@ -109,15 +109,15 @@ export default {
       // Implement search functionality
       console.log('Searching for:', this.searchKeyword)
     },
-    handleAdd() {
+    handleAdd () {
       // Navigate to add category page
-      this.$router.push('/category/add')
+      this.$router.push('/shop/products/categories/add')
     },
-    handleAddSub(row) {
+    handleAddSub (row) {
       // Navigate to add subcategory page with parent id
       this.$router.push(`/category/add?parentId=${row.id}`)
     },
-    handleEdit(row) {
+    handleEdit (row) {
       // Navigate to edit category page
       this.$router.push(`/category/edit/${row.id}`)
     },
