@@ -80,22 +80,6 @@ const menuItems = ref([
   },
 
   {
-    title: '学习教程',
-    icon: 'tutorial-icon',
-    children: [
-      {
-        title: '学习教程',
-        icon: 'document-icon',
-        path: '/tutorials'
-      },
-      {
-        title: '视频教程',
-        icon: 'video-icon',
-        path: '/video-tutorials'
-      }
-    ]
-  },
-  {
     title: '商品',
     icon: 'product-icon',
     children: [

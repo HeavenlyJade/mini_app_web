@@ -2,7 +2,7 @@
   <div class="page-container">
     <!-- 页面头部 -->
     <div class="page-header">
-      <h2 class="page-title">商品分类管理</h2>
+      <h2 class="page-title">{{ isEdit ? '编辑商品分类' : '添加商品分类' }}</h2>
     </div>
 
     <!-- 分类添加表单 -->
@@ -28,12 +28,12 @@
 
         <div class="form-item">
           <label>所属门店</label>
-          <input type="text" v-model="categoryForm.store" class="form-input" placeholder="所属门店">
+          <input type="text" v-model="categoryForm.store_id" class="form-input" placeholder="所属门店">
         </div>
 
         <div class="form-item">
           <label>上级分类</label>
-          <select v-model="categoryForm.parentCategory" class="form-select">
+          <select v-model="categoryForm.parent_id" class="form-select">
             <option value="">请选择</option>
             <option v-for="category in parentCategories" :key="category.id" :value="category.id">
               {{ category.name }}
@@ -52,45 +52,51 @@
         <div class="form-item">
           <label>图标</label>
           <div class="upload-container">
-            <button class="upload-btn">
-              <i class="upload-icon"></i>
-              插入图标图片
-            </button>
-            <button class="upload-btn">
-              <i class="upload-icon"></i>
-              上传本地图片
-            </button>
+            <el-upload
+              action="#"
+              :http-request="uploadIcon"
+              :show-file-list="false"
+              :before-upload="beforeIconUpload">
+              <el-button type="warning" :icon="Upload">上传图标</el-button>
+            </el-upload>
+            <div v-if="categoryForm.icon" class="preview-container">
+              <img :src="categoryForm.icon" class="preview-image" alt="图标预览">
+              <el-button type="danger" :icon="Delete" size="small" @click="removeIcon" class="remove-btn">删除</el-button>
+            </div>
           </div>
         </div>
 
         <div class="form-item">
           <label>图片</label>
           <div class="upload-container">
-            <button class="upload-btn">
-              <i class="upload-icon"></i>
-              插入图标图片
-            </button>
-            <button class="upload-btn">
-              <i class="upload-icon"></i>
-              上传本地图片
-            </button>
+            <el-upload
+              action="#"
+              :http-request="uploadImage"
+              :show-file-list="false"
+              :before-upload="beforeImageUpload">
+              <el-button type="warning" :icon="Upload">上传图片</el-button>
+            </el-upload>
+            <div v-if="categoryForm.image" class="preview-container">
+              <img :src="categoryForm.image" class="preview-image" alt="图片预览">
+              <el-button type="danger" :icon="Delete" size="small" @click="removeImage" class="remove-btn">删除</el-button>
+            </div>
           </div>
         </div>
 
         <div class="form-item">
           <label>排序</label>
-          <input type="number" v-model="categoryForm.sort" class="form-input" placeholder="0">
+          <input type="number" v-model="categoryForm.sort_order" class="form-input" placeholder="0">
         </div>
 
         <div class="form-item">
           <label class="required">状态</label>
           <div class="radio-group">
             <label class="radio-item">
-              <input type="radio" v-model="categoryForm.status" value="active" checked>
+              <input type="radio" v-model="categoryForm.status" value="正常">
               <span>正常</span>
             </label>
             <label class="radio-item">
-              <input type="radio" v-model="categoryForm.status" value="disabled">
+              <input type="radio" v-model="categoryForm.status" value="停用">
               <span>停用</span>
             </label>
           </div>
@@ -99,11 +105,17 @@
         <div class="form-item">
           <label>扩展属性</label>
           <div class="extension-properties">
-            <div class="input-group">
-              <input type="text" class="form-input" placeholder="属性名称">
+            <div class="input-group" v-for="(prop, index) in customProperties" :key="index">
+              <input type="text" class="form-input" placeholder="属性名称" v-model="prop.key">
               <span class="separator">:</span>
-              <input type="text" class="form-input" placeholder="属性值">
-              <button class="add-btn green">添加</button>
+              <input type="text" class="form-input" placeholder="属性值" v-model="prop.value">
+              <button class="remove-btn red" @click="removeProperty(index)">删除</button>
+            </div>
+            <div class="input-group">
+              <input type="text" class="form-input" placeholder="属性名称" v-model="newProperty.key">
+              <span class="separator">:</span>
+              <input type="text" class="form-input" placeholder="属性值" v-model="newProperty.value">
+              <button class="add-btn green" @click="addProperty">添加</button>
             </div>
           </div>
         </div>
@@ -114,7 +126,7 @@
             <rich-text-editor
               v-model:value="categoryForm.content"
               placeholder="请输入详细介绍..."
-              :height="300"
+              :height="500"
               @change="handleContentChange"
             />
           </div>
@@ -129,76 +141,283 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ElMessage, ElLoading } from 'element-plus'
+import { Upload, Delete } from '@element-plus/icons-vue'
 import RichTextEditor from '@/components/richtext/RichTextEditor.vue'
+import http from '@/utils/http'
 
-export default {
-  name: 'CategoryAddPage',
-  components: {
-    RichTextEditor
-  },
-  data () {
-    return {
-      categoryForm: {
-        name: '',
-        remark: '',
-        type: '',
-        store: '',
-        parentCategory: '',
-        code: '',
-        sort: 0,
-        status: 'active',
-        content: '' // 富文本编辑器内容
-      },
-      parentCategories: [
-        {
-          id: 1,
-          name: '食品'
-        },
-        {
-          id: 2,
-          name: '电器'
-        },
-        {
-          id: 3,
-          name: '服装'
-        },
-      ]
-    }
-  },
-  methods: {
-    handleContentChange (html) {
-      console.log('编辑器内容已更新:', html)
-      // 可以在这里进行其他操作，比如内容验证等
-    },
-    submitForm () {
-      // 表单验证
-      if (!this.categoryForm.name) {
-        this.$message.error('请输入分类名称');
-        return;
+// 路由和导航
+const route = useRoute()
+const router = useRouter()
+
+// 状态变量
+const categoryId = computed(() => route.params.id || route.query.id)
+const isEdit = computed(() => !!categoryId.value)
+const loading = ref(false)
+const parentCategories = ref([])
+const customProperties = ref([])
+const newProperty = reactive({ key: '', value: '' })
+
+// 表单数据
+const categoryForm = reactive({
+  id: '',
+  name: '',
+  remark: '',
+  type: '',
+  store_id: null,
+  parent_id: '',
+  code: '',
+  icon: '',
+  image: '',
+  sort_order: 0,
+  status: '正常',
+  content: ''
+})
+
+// 获取父级分类列表
+const fetchParentCategories = async () => {
+  try {
+    loading.value = true
+    const response = await http.get('/api/v1/mini_core/product-category')
+    if (response.data) {
+      // 处理数据格式
+      if (Array.isArray(response.data)) {
+        parentCategories.value = response.data.filter(item => item.parent_id === 0)
+      } else if (response.data.data && Array.isArray(response.data.data)) {
+        parentCategories.value = response.data.data.filter(item => item.parent_id === 0)
       }
-
-      // 提交表单数据
-      console.log('提交的表单数据:', this.categoryForm);
-
-      // 这里调用API保存数据
-      // this.$api.category.save(this.categoryForm).then(res => {
-      //   if (res.code === 0) {
-      //     this.$message.success('保存成功');
-      //     this.$router.push('/category/list');
-      //   } else {
-      //     this.$message.error(res.message || '保存失败');
-      //   }
-      // }).catch(error => {
-      //   this.$message.error('网络错误，请稍后重试');
-      //   console.error(error);
-      // });
-    },
-    cancel () {
-      this.$router.go(-1);
     }
+  } catch (error) {
+    console.error('获取父级分类失败:', error)
+    ElMessage.error('获取父级分类失败')
+  } finally {
+    loading.value = false
   }
 }
+
+// 获取分类详情（编辑模式）
+const fetchCategoryDetail = async () => {
+  if (!categoryId.value) return
+
+  try {
+    loading.value = true
+    const response = await http.get(`/api/v1/mini_core/product-category/${categoryId.value}`)
+    if (response.data) {
+      const categoryData = Array.isArray(response.data) ? response.data[0] : response.data.data || response.data
+
+      // 更新表单数据
+      Object.keys(categoryForm).forEach(key => {
+        if (categoryData[key] !== undefined) {
+          categoryForm[key] = categoryData[key]
+        }
+      })
+
+      // 处理自定义属性
+      if (categoryData.custom_properties) {
+        try {
+          const props = JSON.parse(categoryData.custom_properties)
+          customProperties.value = Object.entries(props).map(([key, value]) => ({ key, value }))
+        } catch (e) {
+          console.error('解析自定义属性失败:', e)
+        }
+      }
+    }
+  } catch (error) {
+    console.error('获取分类详情失败:', error)
+    ElMessage.error('获取分类详情失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 添加自定义属性
+const addProperty = () => {
+  if (!newProperty.key.trim()) {
+    ElMessage.warning('请输入属性名称')
+    return
+  }
+
+  customProperties.value.push({
+    key: newProperty.key,
+    value: newProperty.value
+  })
+
+  // 清空输入
+  newProperty.key = ''
+  newProperty.value = ''
+}
+
+// 删除自定义属性
+const removeProperty = (index) => {
+  customProperties.value.splice(index, 1)
+}
+
+// 上传图标前检查
+const beforeIconUpload = (file) => {
+  const isImage = file.type.startsWith('image/')
+  const isLt2M = file.size / 1024 / 1024 < 2
+
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件!')
+    return false
+  }
+  if (!isLt2M) {
+    ElMessage.error('图片大小不能超过 2MB!')
+    return false
+  }
+  return true
+}
+
+// 上传图标
+const uploadIcon = async (options) => {
+  try {
+    const formData = new FormData()
+    formData.append('file', options.file)
+
+    const loading = ElLoading.service({
+      lock: true,
+      text: '上传中...',
+      background: 'rgba(0, 0, 0, 0.7)'
+    })
+
+    const response = await http.post('/api/v1/upload/image', formData)
+    loading.close()
+
+    if (response.data && response.data.url) {
+      categoryForm.icon = response.data.url
+      ElMessage.success('图标上传成功')
+    } else {
+      ElMessage.error('图标上传失败')
+    }
+  } catch (error) {
+    ElMessage.error('图标上传失败: ' + error.message)
+  }
+}
+
+// 删除图标
+const removeIcon = () => {
+  categoryForm.icon = ''
+}
+
+// 上传图片前检查
+const beforeImageUpload = (file) => {
+  const isImage = file.type.startsWith('image/')
+  const isLt5M = file.size / 1024 / 1024 < 5
+
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件!')
+    return false
+  }
+  if (!isLt5M) {
+    ElMessage.error('图片大小不能超过 5MB!')
+    return false
+  }
+  return true
+}
+
+// 上传图片
+const uploadImage = async (options) => {
+  try {
+    const formData = new FormData()
+    formData.append('file', options.file)
+
+    const loading = ElLoading.service({
+      lock: true,
+      text: '上传中...',
+      background: 'rgba(0, 0, 0, 0.7)'
+    })
+
+    const response = await http.post('/api/v1/upload/image', formData)
+    loading.close()
+
+    if (response.data && response.data.url) {
+      categoryForm.image = response.data.url
+      ElMessage.success('图片上传成功')
+    } else {
+      ElMessage.error('图片上传失败')
+    }
+  } catch (error) {
+    ElMessage.error('图片上传失败: ' + error.message)
+  }
+}
+
+// 删除图片
+const removeImage = () => {
+  categoryForm.image = ''
+}
+
+// 富文本内容变更
+const handleContentChange = (html) => {
+  categoryForm.content = html
+}
+
+// 提交表单
+const submitForm = async () => {
+  // 表单验证
+  if (!categoryForm.name) {
+    ElMessage.error('请输入分类名称')
+    return
+  }
+
+  // 处理自定义属性
+  const customPropertiesObj = {}
+  customProperties.value.forEach(prop => {
+    if (prop.key.trim()) {
+      customPropertiesObj[prop.key] = prop.value
+    }
+  })
+
+  // 构建提交数据
+  const submitData = {
+    ...categoryForm,
+    custom_properties: JSON.stringify(customPropertiesObj)
+  }
+
+  try {
+    loading.value = true
+
+    let response
+    if (isEdit.value) {
+      // 编辑模式
+      response = await http.put(`/api/v1/mini_core/product-category/${categoryId.value}`, submitData)
+    } else {
+      // 新增模式
+      response = await http.post('/api/v1/mini_core/product-category', submitData)
+    }
+
+    if (response.data) {
+      ElMessage.success(isEdit.value ? '更新成功' : '添加成功')
+      // 返回列表页
+      router.push('/shop/products/categories')
+    } else {
+      ElMessage.error(isEdit.value ? '更新失败' : '添加失败')
+    }
+  } catch (error) {
+    console.error('提交表单失败:', error)
+    ElMessage.error(`提交失败: ${error.message || '网络错误'}`)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 取消操作
+const cancel = () => {
+  router.go(-1)
+}
+
+// 生命周期钩子
+onMounted(async () => {
+  // 加载父级分类数据
+  await fetchParentCategories()
+
+  // 如果是编辑模式，加载分类详情
+  if (isEdit.value) {
+    await fetchCategoryDetail()
+  }
+})
 </script>
 
 <style scoped>
@@ -286,20 +505,32 @@ export default {
 
 .upload-container {
   display: flex;
-  gap: 10px;
+  gap: 15px;
+  align-items: center;
 }
 
-.upload-btn {
-  display: inline-flex;
+.preview-container {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 8px 15px;
-  background-color: #f0ad4e;
+  gap: 5px;
+}
+
+.preview-image {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+}
+
+.remove-btn {
+  background-color: #f56c6c;
   color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  padding: 4px 8px;
 }
 
 .radio-group {
@@ -322,6 +553,7 @@ export default {
 .input-group {
   display: flex;
   align-items: center;
+  margin-bottom: 10px;
 }
 
 .separator {
@@ -329,7 +561,7 @@ export default {
   color: #606266;
 }
 
-.add-btn {
+.add-btn, .remove-btn {
   padding: 8px 15px;
   margin-left: 10px;
   border: none;
@@ -340,6 +572,10 @@ export default {
 
 .green {
   background-color: #67c23a;
+}
+
+.red {
+  background-color: #f56c6c;
 }
 
 .editor-container {

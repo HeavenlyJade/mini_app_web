@@ -7,15 +7,15 @@
       <div class="login-right">
         <div class="login-form">
           <h2>欢迎来到起世逸源小程序管理系统</h2>
-          <el-form :model="userItem" :rules="rules">
-            <el-form-item label="账号：" prop="account">
-              <el-input v-model="userItem.account" placeholder="请输入账号"></el-input>
+          <el-form :model="userItem" :rules="rules" ref="loginForm">
+            <el-form-item label="账号：" prop="username">
+              <el-input v-model="userItem.username" placeholder="请输入账号"></el-input>
             </el-form-item>
             <el-form-item label="密码：" prop="password">
               <el-input v-model="userItem.password" type="password" placeholder="请输入密码"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="goHome" class="login-button">登录</el-button>
+              <el-button type="primary" @click="login" class="login-button" :loading="loading">登录</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -25,47 +25,78 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted } from "vue";
-import { ElMessage } from "element-plus";
+import { reactive, ref, onMounted, getCurrentInstance } from "vue";
+import { ElMessage, FormInstance } from "element-plus";
 import router from "@/router";
+import axios from "axios";
 
-const userItem = ref({account: "admin", password: "123"});
+// 获取全局属性
+const { proxy } = getCurrentInstance() || { proxy: null };
+const baseApi = proxy?.$baseApi || '';
+const apiUrls = proxy?.$apiUrl || {};
 
+// 登录表单数据
+const userItem = ref({
+  username: '',
+  password: ''
+});
+
+// 登录状态
+const loading = ref(false);
+const loginForm = ref<FormInstance>();
+
+// 表单验证规则
 const rules = reactive({
-  account: [
+  username: [
     {required: true, message: '请输入账号', trigger: 'blur'},
   ],
   password: [
     {required: true, message: '请输入密码', trigger: 'blur'},
   ],
-})
+});
 
-function goHome() {
-  if (userItem.value.account == "admin" && userItem.value.password == "123") {
-    // 生成模拟的token (实际项目中应该从后端获取)
-    const token = generateToken(userItem.value.account);
+// 登录方法
+async function login() {
+  if (!loginForm.value) return;
 
-    // 存储登录信息
-    localStorage.setItem('token', token);
-    localStorage.setItem('isLogin', 'true');
-    localStorage.setItem('userInfo', JSON.stringify({
-      account: userItem.value.account,
-      loginTime: new Date().toISOString()
-    }));
+  await loginForm.value.validate(async (valid) => {
+    if (valid) {
+      loading.value = true;
+      try {
+        // 使用全局API变量
+        // 调用登录API
+        const response = await axios.post('/api/v1/users/login', {
+  username: userItem.value.username,
+  password: userItem.value.password
+});
+        console.log(response)
+        // 处理登录成功响应
+        if (response.data) {
+          // 存储登录信息
+          localStorage.setItem('token', response.data.access_token);
+          localStorage.setItem('refresh_token', response.data.refresh_token);
+          localStorage.setItem('isLogin', 'true');
+          localStorage.setItem('userInfo', JSON.stringify({
+            username: userItem.value.username,
+            loginTime: new Date().toISOString()
+          }));
 
-    ElMessage.success('登录成功');
-    router.push("/home");
-  } else {
-    ElMessage.error("请输入正确的账号或密码");
-  }
-}
-
-// 生成模拟的token (实际项目中应该从后端获取)
-function generateToken(username: string): string {
-  // 简单的token生成方法，实际项目中应该使用后端提供的token
-  const randomPart = Math.random().toString(36).substring(2);
-  const timestamp = new Date().getTime();
-  return `${username}_${randomPart}_${timestamp}`;
+          ElMessage.success(response.data.msg || '登录成功');
+          router.push("/home");
+        } else {
+          ElMessage.error(response.data.msg || '登录失败');
+        }
+      } catch (error: any) {
+        console.error('登录请求失败:', error);
+        ElMessage.error(error.response?.data?.msg || '登录失败，请检查网络连接');
+      } finally {
+        loading.value = false;
+      }
+    } else {
+      ElMessage.warning('请填写完整的登录信息');
+      return false;
+    }
+  });
 }
 
 // 组件挂载时初始化
