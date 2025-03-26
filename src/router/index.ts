@@ -24,6 +24,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: '首页' } // 添加页面标题，会显示在顶部栏
       },
       {
+        path: '/shop/store/list',
+        name: 'store_type',
+        component: () => import('@/views/shop/store/store_category_manage.vue'),
+        meta: { title: '门店分类' }
+      },
+      {
         path: '/shop/products/categories',
         name: 'shop_type',
         component: () => import('@/views/shop/shop_product_type.vue'),
@@ -46,7 +52,8 @@ const routes: Array<RouteRecordRaw> = [
         name: 'shop_product_add',
         component: () => import('@/views/shop/merchandise/product_add.vue'),
         meta: { title: '商品列表新增' }
-      }, {
+      },
+      {
         path: '/shop/products/specification_size',
         name: 'specification_size',
         component: () => import('@/views/shop/merchandise/specification_size.vue'),

@@ -2,7 +2,7 @@
   <div class="page-container">
     <!-- 页面头部 -->
     <div class="page-header">
-      <h2 class="page-title">{{ isEdit ? '编辑商品分类' : '添加商品分类' }}</h2>
+      <h2 class="page-title">{{ isEdit ? '编辑门店分类' : '添加门店分类' }}</h2>
     </div>
 
     <!-- 分类添加表单 -->
