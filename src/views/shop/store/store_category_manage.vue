@@ -434,9 +434,7 @@ export default {
 
       this.tableLoading = true
       try {
-        const response = await http.post('/api/v1/mini_core/batch-delete', {
-      ids: ids
-    })
+        const response = await http.post('/api/v1/mini_core/batch-delete',{ids: ids} )
 
         // 根据后端返回的结构处理响应
         if (response.data.code === 200) {

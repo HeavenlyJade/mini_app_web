@@ -86,8 +86,19 @@ const menuItems = ref([
       {
         title: '门店分类管理',
         icon: 'list-icon',
+        path: '/shop/store_category/list'
+      },
+          {
+        title: '门店管理',
+        icon: 'list-icon',
         path: '/shop/store/list'
       },
+      {
+        title: '门店新增',
+        icon: 'list-icon',
+        path: '/shop/store/add'
+      },
+
       {
         title: '商品列表',
         icon: 'list-icon',

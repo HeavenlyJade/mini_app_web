@@ -24,11 +24,24 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: '首页' } // 添加页面标题，会显示在顶部栏
       },
       {
-        path: '/shop/store/list',
+        path: '/shop/store_category/list',
         name: 'store_type',
         component: () => import('@/views/shop/store/store_category_manage.vue'),
         meta: { title: '门店分类' }
       },
+           {
+        path: '/shop/store/list',
+        name: 'store_list',
+        component: () => import('@/views/shop/store/store_manage.vue'),
+        meta: { title: '门店列表' }
+      },
+           {
+        path: '/shop/store/add',
+        name: 'store_add',
+        component: () => import('@/views/shop/store/store_add.vue'),
+        meta: { title: '门店新增' }
+      },
+
       {
         path: '/shop/products/categories',
         name: 'shop_type',
