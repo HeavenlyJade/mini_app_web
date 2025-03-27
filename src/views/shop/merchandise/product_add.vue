@@ -144,7 +144,8 @@
           <div class="form-row">
             <div class="form-item">
               <label>购买须知</label>
-              <textarea v-model="formData.purchaseNotes" class="text-area" placeholder="购买须知，最多500个字"></textarea>
+              <textarea v-model="formData.purchaseNotes" class="text-area"
+                        placeholder="购买须知，最多500个字"></textarea>
               <div class="char-count">最多500个</div>
             </div>
           </div>
@@ -326,20 +327,20 @@
 
         <!-- 商品详情 -->
         <div class="form-section">
-  <div class="form-row">
-    <div class="form-item full-width">
-      <label>详细介绍</label>
-      <div class="editor-container">
-        <rich-text-editor
-          v-model:value="formData.description"
-          placeholder="请输入商品详细介绍..."
-          :height="300"
-          @change="handleContentChange"
-        />
-      </div>
-    </div>
-  </div>
-</div>
+          <div class="form-row">
+            <div class="form-item full-width">
+              <label>详细介绍</label>
+              <div class="editor-container">
+                <rich-text-editor
+                  v-model:value="formData.description"
+                  placeholder="请输入商品详细介绍..."
+                  :height="300"
+                  @change="handleContentChange"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- 价格和库存信息 -->
         <div class="form-section">
@@ -573,6 +574,7 @@ const handleContentChange = (html) => {
   width: 100%;
   max-width: 800px;
 }
+
 .page-container {
   width: 100%;
   padding: 20px;
