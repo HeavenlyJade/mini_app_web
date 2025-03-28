@@ -14,6 +14,7 @@ const imageUploadHttp = axios.create({
   timeout: 30000, // 上传可能需要更长的超时时间
 })
 
+
 // 请求拦截器 - 主实例
 http.interceptors.request.use(
   config => {
@@ -213,7 +214,23 @@ export default {
       ...config
     })
   },
+  async getBaseDropdownData(keyword) {
+    return http.get('/api/v1/mini_core/base_down', { params: { keyword } })
+  },
 
+    /**
+   * 获取门店列表
+   * @returns {Promise<Array>} - 返回门店数据数组
+   */
+  async get_downs(keyword) {
+    try {
+      const response = await this.getBaseDropdownData(keyword)
+      return response.data && Array.isArray(response.data) ? response.data : []
+    } catch (error) {
+      console.error('获取数据失败:', error)
+      return []
+    }
+  },
   // 图片上传专用POST请求
   uploadImage(formData, config = {}) {
     return imageUploadHttp.post('/api/v1/mini_core/upload_image', formData, {

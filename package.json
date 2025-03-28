@@ -23,8 +23,10 @@
     "mavon-editor": "^3.0.0-beta",
     "tinymce": "^7.7.2",
     "vue": "^3.0.0",
+    "vue-draggable-next": "^2.2.1",
     "vue-router": "^4.0.0-0",
     "vue-scrollto": "^2.20.0",
+    "vuedraggable": "^4.1.0",
     "vuex": "^4.0.0-0"
   },
   "devDependencies": {

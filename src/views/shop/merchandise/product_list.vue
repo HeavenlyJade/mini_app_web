@@ -14,15 +14,15 @@
             <i class="add-icon"></i> 商品新增
           </router-link>
           <div class="dropdown">
-            <button class="btn btn-secondary">批量操作 <i class="arrow-down"></i></button>
+            <button class="btn btn-secondary" @click="toggleBatchMenu">批量操作 <i class="arrow-down"></i></button>
             <!-- 下拉菜单内容 -->
             <div class="dropdown-content" v-if="showBatchMenu">
-              <div class="dropdown-item">批量上架</div>
-              <div class="dropdown-item">批量下架</div>
-              <div class="dropdown-item">批量删除</div>
+              <div class="dropdown-item" @click="handleBatchAction('publish')">批量上架</div>
+              <div class="dropdown-item" @click="handleBatchAction('unpublish')">批量下架</div>
+              <div class="dropdown-item" @click="handleBatchAction('delete')">批量删除</div>
             </div>
           </div>
-          <button class="btn btn-danger">
+          <button class="btn btn-danger" @click="rebuildSort">
             <i class="refresh-icon"></i> 重建排序
           </button>
         </div>
@@ -32,12 +32,13 @@
             <input
               type="text"
               class="search-input"
-              placeholder="商品分类"
+              placeholder="商品名称/编号/关键词"
               v-model="searchQuery"
               @focus="showSearchDropdown = true"
               @blur="onSearchBlur"
+              @keyup.enter="searchProducts"
             />
-            <button class="search-btn">
+            <button class="search-btn" @click="searchProducts">
               <i class="search-icon"></i>
             </button>
 
@@ -62,7 +63,7 @@
           :key="index"
           class="status-tab"
           :class="{ active: activeTab === tab.value }"
-          @click="activeTab = tab.value"
+          @click="changeTab(tab.value)"
         >
           {{ tab.label }}
         </div>
@@ -70,7 +71,11 @@
 
       <!-- 商品表格 -->
       <div class="product-table">
-        <table>
+        <div v-if="loading" class="loading-indicator">
+          <div class="spinner"></div>
+          <div class="loading-text">加载中...</div>
+        </div>
+        <table v-else>
           <thead>
           <tr>
             <th class="checkbox-col">
@@ -88,7 +93,15 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="(product, index) in productList" :key="product.id">
+          <tr v-if="productList.length === 0">
+            <td colspan="10" class="empty-table">
+              <div class="empty-message">
+                <i class="empty-icon"></i>
+                <p>暂无商品数据</p>
+              </div>
+            </td>
+          </tr>
+          <tr v-for="(product, index) in productList" :key="product.id || index">
             <td class="checkbox-col">
               <input
                 type="checkbox"
@@ -97,37 +110,42 @@
               />
             </td>
             <td class="image-col">
-              <img :src="product.image" :alt="product.name" class="product-image"/>
+              <img v-if="product.images" :src="getFirstImage(product.images)" :alt="product.name || '商品图片'" class="product-image"/>
+              <div v-else class="no-image">无图片</div>
             </td>
             <td class="code-col">
-              {{ product.code }}<br/>
-              <span class="secondary-text">{{ product.barcode }}</span>
+              {{ product.code || '暂无编号' }}<br/>
+              <span class="secondary-text">{{ product.barcode || '-' }}</span>
             </td>
             <td class="name-col">
               <div class="product-name">
-                <span v-if="product.isRecommended" class="tag recommended">[推荐]</span>
-                {{ product.name }}
+                <span v-if="product.is_recommended" class="tag recommended">[推荐]</span>
+                {{ product.name || '未命名商品' }}
               </div>
             </td>
-            <td class="category-col">{{ product.category }}</td>
-            <td class="shop-col">{{ product.shop }}</td>
-            <td class="store-col">{{ product.storeCategory }}</td>
+            <td class="category-col">{{ getCategoryName(product.category_id) }}</td>
+            <td class="shop-col">{{ product.shop || '-' }}</td>
+            <td class="store-col">{{ product.store_category || '-' }}</td>
             <td class="stock-col">
-              {{ product.stock }}
-              <div class="status-badge" :class="product.status">{{ product.statusText }}</div>
+              {{ product.stock || 0 }}
+              <div class="status-badge" :class="getStatusClass(product.status)">
+                {{ getStatusText(product.status) }}
+              </div>
             </td>
             <td class="price-col">
-              <span class="price">¥ {{ product.price }}</span>
-              <span class="original-price" v-if="product.originalPrice">¥ {{ product.originalPrice }}</span>
+              <span class="price">¥ {{ product.price || 0 }}</span>
+              <span class="original-price" v-if="product.market_price && product.market_price > product.price">
+                ¥ {{ product.market_price }}
+              </span>
             </td>
             <td class="actions-col">
-              <button class="btn-icon edit">
+              <button class="btn-icon edit" @click="handleEdit(product)">
                 <i class="edit-icon"></i>
               </button>
-              <button class="btn-icon view">
+              <button class="btn-icon view" @click="handleView(product)">
                 <i class="view-icon"></i>
               </button>
-              <button class="btn-icon delete">
+              <button class="btn-icon delete" @click="handleDelete(product)">
                 <i class="delete-icon"></i>
               </button>
             </td>
@@ -137,13 +155,14 @@
       </div>
 
       <!-- 分页 -->
-      <div class="pagination">
+      <div class="pagination" v-if="totalProducts > 0">
         <div class="pagination-info">Total {{ totalProducts }}</div>
         <div class="page-size-selector">
-          <select v-model="pageSize">
+          <select v-model="pageSize" @change="handlePageSizeChange">
+            <option value="10">10/page</option>
+            <option value="20">20/page</option>
             <option value="50">50/page</option>
             <option value="100">100/page</option>
-            <option value="200">200/page</option>
           </select>
         </div>
         <div class="pagination-controls">
@@ -175,10 +194,12 @@
           <div class="jump-page">
             Go to
             <input
-              type="text"
+              type="number"
               v-model="jumpToPage"
               @keyup.enter="jumpTo"
               class="jump-input"
+              min="1"
+              :max="totalPages"
             />
           </div>
         </div>
@@ -187,206 +208,411 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+<script>
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import http from '@/utils/http'
 
-// 搜索和下拉
-const searchQuery = ref('')
-const showSearchDropdown = ref(false)
-const showBatchMenu = ref(false)
+export default {
+  name: 'ProductList',
+  setup() {
+    // 路由
+    const router = useRouter()
 
-// 统计数据
-const stats = ref({
-  views: 2,
-  favorites: 0,
-  orders: 0,
-  sales: 0,
-  satisfaction: 0,
-  likes: 0,
-  dislikes: 0
-})
+    // 搜索和下拉
+    const searchQuery = ref('')
+    const showSearchDropdown = ref(false)
+    const showBatchMenu = ref(false)
 
-// 延迟关闭搜索下拉
-const onSearchBlur = () => {
-  setTimeout(() => {
-    showSearchDropdown.value = false
-  }, 200)
+    // 状态变量
+    const loading = ref(false)
+    const productList = ref([])
+    const categories = ref([])
+    const error = ref(null)
+
+    // 统计数据
+    const stats = ref({
+      views: 0,
+      favorites: 0,
+      orders: 0,
+      sales: 0,
+      satisfaction: 0,
+      likes: 0,
+      dislikes: 0
+    })
+
+    // 延迟关闭搜索下拉
+    const onSearchBlur = () => {
+      setTimeout(() => {
+        showSearchDropdown.value = false
+      }, 200)
+    }
+
+    // 状态标签
+    const statusTabs = [
+      {
+        label: '全部',
+        value: 'all'
+      },
+      {
+        label: '销售中',
+        value: 'selling'
+      },
+      {
+        label: '已售罄',
+        value: 'soldout'
+      },
+      {
+        label: '仓库中',
+        value: 'stored'
+      }
+    ]
+    const activeTab = ref('all')
+
+    // 选择商品
+    const selectAll = ref(false)
+    const selectedProducts = ref([])
+
+    // 分页
+    const totalProducts = ref(0)
+    const currentPage = ref(1)
+    const pageSize = ref(10)
+    const jumpToPage = ref('')
+
+    // 获取商品列表
+    const fetchProducts = async () => {
+      loading.value = true
+      error.value = null
+
+      try {
+        const params = {
+          page: currentPage.value,
+          size: pageSize.value,
+          keyword: searchQuery.value,
+          status: activeTab.value === 'all' ? '' : activeTab.value
+        }
+
+        const response = await http.get('/api/v1/mini_core/shop-product', params)
+
+        if (response.data && response.data.code === 200) {
+          productList.value = response.data.data
+          totalProducts.value = response.data.total
+
+          // 清空选择
+          selectedProducts.value = []
+          selectAll.value = false
+        } else {
+          error.value = '获取商品列表失败'
+          console.error('获取商品列表返回错误:', response.data)
+        }
+      } catch (err) {
+        error.value = '获取商品列表出错'
+        console.error('获取商品列表错误:', err)
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // 获取分类列表
+    const fetchCategories = async () => {
+      try {
+        const response = await http.get('/api/v1/mini_core/product-category')
+        if (response.data && response.data.data) {
+          categories.value = response.data.data
+        }
+      } catch (err) {
+        console.error('获取分类列表错误:', err)
+      }
+    }
+
+    // 获取分类名称
+    const getCategoryName = (categoryId) => {
+      if (!categoryId) return '-'
+      const category = categories.value.find(cat => cat.id === categoryId)
+      return category ? category.name : '-'
+    }
+
+    // 获取商品第一张图片
+    const getFirstImage = (images) => {
+      if (!images) return ''
+      try {
+        // 尝试解析JSON字符串
+        if (typeof images === 'string') {
+          const parsedImages = JSON.parse(images)
+          return Array.isArray(parsedImages) && parsedImages.length > 0 ? parsedImages[0] : ''
+        }
+        // 如果已经是数组
+        if (Array.isArray(images) && images.length > 0) {
+          return images[0]
+        }
+      } catch (err) {
+        console.error('解析商品图片错误:', err)
+      }
+      return ''
+    }
+
+    // 获取状态类名
+    const getStatusClass = (status) => {
+      switch (status) {
+        case 'selling':
+        case '上架':
+          return 'in-stock'
+        case 'soldout':
+        case '售罄':
+          return 'out-stock'
+        case 'stored':
+        case '下架':
+          return 'in-warehouse'
+        default:
+          return 'unknown'
+      }
+    }
+
+    // 获取状态文本
+    const getStatusText = (status) => {
+      switch (status) {
+        case 'selling':
+          return '上架'
+        case 'soldout':
+          return '售罄'
+        case 'stored':
+          return '下架'
+        default:
+          return status || '未知'
+      }
+    }
+
+    // 切换全选
+    const toggleSelectAll = () => {
+      if (selectAll.value) {
+        selectedProducts.value = productList.value.map(item => item.id).filter(Boolean)
+      } else {
+        selectedProducts.value = []
+      }
+    }
+
+    // 监听选中项变化同步全选状态
+    watch(selectedProducts, (newVal) => {
+      const validProducts = productList.value.filter(p => p.id !== undefined && p.id !== null)
+      selectAll.value = newVal.length > 0 && newVal.length === validProducts.length
+    })
+
+    // 总页数
+    const totalPages = computed(() => {
+      return Math.ceil(totalProducts.value / pageSize.value) || 1
+    })
+
+    // 显示的页码
+    const displayPages = computed(() => {
+      let start = Math.max(1, currentPage.value - 2)
+      let end = Math.min(totalPages.value, start + 4)
+
+      // 调整起始页，确保显示5个页码或全部页码
+      if (end - start + 1 < 5 && totalPages.value >= 5) {
+        start = Math.max(1, end - 4)
+      }
+
+      return Array.from({length: end - start + 1}, (_, i) => start + i)
+    })
+
+    // 切换状态标签
+    const changeTab = (tabValue) => {
+      activeTab.value = tabValue
+      currentPage.value = 1
+      fetchProducts()
+    }
+
+    // 搜索商品
+    const searchProducts = () => {
+      currentPage.value = 1
+      fetchProducts()
+    }
+
+    // 改变页码
+    const changePage = (page) => {
+      if (page >= 1 && page <= totalPages.value) {
+        currentPage.value = page
+        fetchProducts()
+      }
+    }
+
+    // 改变每页显示数量
+    const handlePageSizeChange = () => {
+      currentPage.value = 1
+      fetchProducts()
+    }
+
+    // 跳转页码
+    const jumpTo = () => {
+      if (jumpToPage.value) {
+        const page = parseInt(jumpToPage.value)
+        if (!isNaN(page) && page >= 1 && page <= totalPages.value) {
+          changePage(page)
+        }
+        jumpToPage.value = ''
+      }
+    }
+
+    // 切换批量操作菜单
+    const toggleBatchMenu = () => {
+      showBatchMenu.value = !showBatchMenu.value
+    }
+
+    // 批量操作
+    const handleBatchAction = async (action) => {
+      if (selectedProducts.value.length === 0) {
+        alert('请选择要操作的商品')
+        return
+      }
+
+      let actionText = ''
+      switch (action) {
+        case 'publish':
+          actionText = '上架'
+          break
+        case 'unpublish':
+          actionText = '下架'
+          break
+        case 'delete':
+          actionText = '删除'
+          break
+      }
+
+      if (confirm(`确认${actionText}选中的 ${selectedProducts.value.length} 个商品吗?`)) {
+        try {
+          loading.value = true
+
+          // 构建请求参数
+          const params = {
+            ids: selectedProducts.value,
+            action: action
+          }
+
+          // 调用批量操作API
+          const response = await http.post('/api/v1/mini_core/shop-product/batch', params)
+
+          if (response.data && response.data.code === 0) {
+            alert(`批量${actionText}成功!`)
+            // 刷新数据
+            fetchProducts()
+          } else {
+            alert(`批量${actionText}失败: ${response.data.message || '未知错误'}`)
+          }
+        } catch (err) {
+          console.error(`批量${actionText}错误:`, err)
+          alert(`批量${actionText}出错: ${err.message || '网络错误'}`)
+        } finally {
+          loading.value = false
+          showBatchMenu.value = false
+        }
+      }
+    }
+
+    // 重建排序
+    const rebuildSort = async () => {
+      if (confirm('确认要重建商品排序吗?')) {
+        try {
+          loading.value = true
+
+          const response = await http.post('/api/v1/mini_core/shop-product/rebuild-sort')
+
+          if (response.data && response.data.code === 0) {
+            alert('重建排序成功!')
+            // 刷新数据
+            fetchProducts()
+          } else {
+            alert(`重建排序失败: ${response.data.message || '未知错误'}`)
+          }
+        } catch (err) {
+          console.error('重建排序错误:', err)
+          alert(`重建排序出错: ${err.message || '网络错误'}`)
+        } finally {
+          loading.value = false
+        }
+      }
+    }
+
+    // 编辑商品
+    const handleEdit = (product) => {
+      router.push(`/shop/products/add?id=${product.id}`)
+    }
+
+    // 查看商品
+    const handleView = (product) => {
+      router.push(`/shop/products/add?id=${product.id}&mode=view`)
+    }
+
+    // 删除商品
+    const handleDelete = async (product) => {
+      if (confirm(`确认删除商品 "${product.name || '未命名商品'}" 吗?`)) {
+        try {
+          loading.value = true
+
+          const response = await http.delete(`/api/v1/mini_core/shop-product/${product.id}`)
+
+          if (response.data && response.data.code === 0) {
+            alert('删除成功!')
+            // 刷新数据
+            fetchProducts()
+          } else {
+            alert(`删除失败: ${response.data.message || '未知错误'}`)
+          }
+        } catch (err) {
+          console.error('删除商品错误:', err)
+          alert(`删除出错: ${err.message || '网络错误'}`)
+        } finally {
+          loading.value = false
+        }
+      }
+    }
+
+    // 初始化
+    onMounted(() => {
+      fetchProducts()
+      fetchCategories()
+    })
+
+    return {
+      // 状态变量
+      loading,
+      productList,
+      error,
+      searchQuery,
+      showSearchDropdown,
+      showBatchMenu,
+      stats,
+      statusTabs,
+      activeTab,
+      selectAll,
+      selectedProducts,
+      totalProducts,
+      currentPage,
+      pageSize,
+      jumpToPage,
+      totalPages,
+      displayPages,
+
+      // 方法
+      onSearchBlur,
+      toggleSelectAll,
+      changeTab,
+      searchProducts,
+      changePage,
+      handlePageSizeChange,
+      jumpTo,
+      toggleBatchMenu,
+      handleBatchAction,
+      rebuildSort,
+      handleEdit,
+      handleView,
+      handleDelete,
+      getCategoryName,
+      getFirstImage,
+      getStatusClass,
+      getStatusText
+    }
+  }
 }
-
-// 状态标签
-const statusTabs = [
-  {
-    label: '全部',
-    value: 'all'
-  },
-  {
-    label: '销售中',
-    value: 'selling'
-  },
-  {
-    label: '已售罄',
-    value: 'soldout'
-  },
-  {
-    label: '仓库中',
-    value: 'stored'
-  }
-]
-const activeTab = ref('all')
-
-// 选择商品
-const selectAll = ref(false)
-const selectedProducts = ref([])
-
-// 模拟商品数据
-const productList = ref([
-  {
-    id: 1,
-    image: '/product-1.jpg',
-    code: '1962891',
-    barcode: '-',
-    name: '金酱酒53度500ml贵州金酱酒香型白酒十大名酒档次粮食送礼高度',
-    category: '研发产品',
-    shop: '-',
-    storeCategory: '研发产品',
-    stock: 200,
-    status: 'in-stock',
-    statusText: '上架',
-    price: 586,
-    originalPrice: null,
-    isRecommended: false
-  },
-  {
-    id: 2,
-    image: '/product-2.jpg',
-    code: '1962887',
-    barcode: '-',
-    name: '金酱53度250ml金酱白酒香型酒庄白酒节国产送礼盒档次纯粮高度',
-    category: '系列酒酒',
-    shop: '-',
-    storeCategory: '系列酒酒',
-    stock: 999996,
-    status: 'in-stock',
-    statusText: '上架',
-    price: 198,
-    originalPrice: 388,
-    isRecommended: true
-  },
-  {
-    id: 3,
-    image: '/product-3.jpg',
-    code: '1961512',
-    barcode: '-',
-    name: '金酱酱香型53度500ml粮标贵州手工酿造高端商务礼盒装单瓶装',
-    category: '自主产品',
-    shop: '-',
-    storeCategory: '自主产品',
-    stock: 36,
-    status: 'in-stock',
-    statusText: '上架',
-    price: 899,
-    originalPrice: 899,
-    isRecommended: false
-  },
-  {
-    id: 4,
-    image: '/product-4.jpg',
-    code: '1961515',
-    barcode: 'a0000000001',
-    name: '53度500ml金酱酒金标贵州酱香型手工酿造高端商务礼盒装单瓶装',
-    category: '自主产品',
-    shop: '-',
-    storeCategory: '自主产品',
-    stock: 99999,
-    status: 'in-stock',
-    statusText: '上架',
-    price: 1099,
-    originalPrice: 1099,
-    isRecommended: true
-  },
-  {
-    id: 5,
-    image: '/product-5.jpg',
-    code: '1961511',
-    barcode: '-',
-    name: '53度500ml高度白酒金酱v15贵州送礼盒酱香型高端商务礼盒装单瓶',
-    category: '自主产品',
-    shop: '-',
-    storeCategory: '自主产品',
-    stock: 56,
-    status: 'in-stock',
-    statusText: '上架',
-    price: 1299,
-    originalPrice: 1299,
-    isRecommended: false
-  },
-  {
-    id: 6,
-    image: '/product-6.jpg',
-    code: '1961484',
-    barcode: '-',
-    name: '53度500ml金酱馆品贵州高度白酒酱香型粮食高端商务礼盒装单瓶装',
-    category: '定制产品',
-    shop: '-',
-    storeCategory: '定制产品',
-    stock: 999996,
-    status: 'in-stock',
-    statusText: '上架',
-    price: 899,
-    originalPrice: null,
-    isRecommended: true
-  }
-])
-
-// 切换全选
-const toggleSelectAll = () => {
-  if (selectAll.value) {
-    selectedProducts.value = productList.value.map(product => product.id)
-  } else {
-    selectedProducts.value = []
-  }
-}
-
-// 监听选中项变化
-const selectedCount = computed(() => selectedProducts.value.length)
-const allSelected = computed(() => {
-  return selectedProducts.value.length === productList.value.length
-})
-
-// 分页
-const totalProducts = ref(6)
-const currentPage = ref(1)
-const pageSize = ref(50)
-const jumpToPage = ref('')
-
-const totalPages = computed(() => {
-  return Math.ceil(totalProducts.value / pageSize.value)
-})
-
-const displayPages = computed(() => {
-  // 简单分页显示，实际项目中可能需要更复杂的逻辑
-  return Array.from({ length: totalPages.value }, (_, i) => i + 1)
-})
-
-const changePage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-    // 这里可以添加加载数据的逻辑
-  }
-}
-
-const jumpTo = () => {
-  const page = parseInt(jumpToPage.value)
-  if (!isNaN(page) && page >= 1 && page <= totalPages.value) {
-    changePage(page)
-  }
-  jumpToPage.value = ''
-}
-
-// 初始化
-onMounted(() => {
-  // 这里可以添加初始化加载数据的逻辑
-})
 </script>
 
 <style lang="less" scoped>

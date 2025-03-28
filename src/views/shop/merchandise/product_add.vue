@@ -8,35 +8,20 @@
     <!-- 页面内容区域 -->
     <div class="page-content">
       <form @submit.prevent="submitForm" class="product-form">
-        <!-- 商店信息 -->
         <div class="form-section">
           <div class="form-row">
             <div class="form-item">
               <label>所属门店</label>
-              <div class="store-options">
-                <div class="store-option active">
-                  <span class="option-text">添加到门店</span>
-                </div>
-                <div class="store-option">
-                  <span class="option-text">没有多选的不需要选择</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-item">
-              <label>省份</label>
               <div class="select-wrapper">
-                <select v-model="formData.province">
-                  <option value="">请选择</option>
-                  <option value="beijing">北京市</option>
-                  <option value="shanghai">上海市</option>
-                  <option value="guangdong">广东省</option>
-                  <!-- 更多选项 -->
+                <select v-model="formData.store_id">
+                  <option value="">请选择门店</option>
+                  <option v-for="store in storeOptions" :key="store.id" :value="store.id">
+                    {{ store.name }}
+                  </option>
                 </select>
                 <i class="arrow-down"></i>
               </div>
+              <div class="input-tip">没有多店铺的不需要选择</div>
             </div>
           </div>
 
@@ -44,12 +29,11 @@
             <div class="form-item">
               <label><span class="required">*</span> 商品分类</label>
               <div class="select-wrapper">
-                <select v-model="formData.category" required>
-                  <option value="">商品分类</option>
-                  <option value="category1">酒类</option>
-                  <option value="category2">饮料</option>
-                  <option value="category3">食品</option>
-                  <!-- 更多选项 -->
+                <select v-model="formData.category_id" required>
+                  <option value="">请选择商品分类</option>
+                  <option v-for="category in categoryOptions" :key="category.id" :value="category.id">
+                    {{ category.name }}
+                  </option>
                 </select>
                 <i class="arrow-down"></i>
               </div>
@@ -124,22 +108,22 @@
               <label>标签(关键词)</label>
               <div class="input-with-tip">
                 <input type="text" v-model="formData.tags" placeholder="标签/关键词">
-                <div class="input-tip">多个标签用空格或逗号隔开</div>
+                <div class="input-tip">多个标签用逗号隔开</div>
               </div>
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-item">
-              <label>扩展属性</label>
-              <div class="attributes-container">
-                <input type="text" class="attribute-input" placeholder="扩展属性名">
-                <span class="attribute-separator">:</span>
-                <input type="text" class="attribute-input" placeholder="扩展属性值">
-                <button type="button" class="add-btn">添加</button>
-              </div>
-            </div>
-          </div>
+          <!--          <div class="form-row">-->
+          <!--            <div class="form-item">-->
+          <!--              <label>扩展属性</label>-->
+          <!--              <div class="attributes-container">-->
+          <!--                <input type="text" class="attribute-input" placeholder="扩展属性名">-->
+          <!--                <span class="attribute-separator">:</span>-->
+          <!--                <input type="text" class="attribute-input" placeholder="扩展属性值">-->
+          <!--                <button type="button" class="add-btn">添加</button>-->
+          <!--              </div>-->
+          <!--            </div>-->
+          <!--          </div>-->
 
           <div class="form-row">
             <div class="form-item">
@@ -273,12 +257,12 @@
               <label><span class="required">*</span> 状态</label>
               <div class="radio-group">
                 <label class="radio-item">
-                  <input type="radio" v-model="formData.status" value="online" checked>
+                  <input type="radio" v-model="formData.status" value="上架" checked>
                   <span class="radio-circle"></span>
                   <span class="radio-text">上架</span>
                 </label>
                 <label class="radio-item">
-                  <input type="radio" v-model="formData.status" value="offline">
+                  <input type="radio" v-model="formData.status" value="下架">
                   <span class="radio-circle"></span>
                   <span class="radio-text">下架</span>
                 </label>
@@ -291,16 +275,6 @@
         <div class="form-section">
           <div class="form-row">
             <div class="form-item">
-              <label>视频编号</label>
-              <div class="input-with-tip">
-                <input type="text" v-model="formData.videoId" placeholder="视频编号">
-                <div class="input-tip">使用已有视频点播视频</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-item">
               <label>视频地址</label>
               <div class="input-with-tip">
                 <input type="text" v-model="formData.videoUrl" placeholder="https://...">
@@ -308,19 +282,15 @@
               </div>
             </div>
           </div>
-
           <div class="form-row">
             <div class="form-item">
-              <label>图片</label>
-              <div class="image-upload-section">
-                <div class="upload-tip">
-                  <span>第一张图片默认为封面图片，可拖动排序</span>
-                </div>
-                <div class="upload-btns">
-                  <button type="button" class="upload-btn">从图片库选择</button>
-                  <button type="button" class="upload-btn secondary">上传本地图片</button>
-                </div>
-              </div>
+              <label>商品图片</label>
+              <file-uploader
+                v-model:value="formData.images"
+                @change="handleImagesChange"
+                :limit="5"
+                tip-text="第一张图片默认为封面图片，可拖动排序">
+              </file-uploader>
             </div>
           </div>
         </div>
@@ -335,7 +305,6 @@
                   v-model:value="formData.description"
                   placeholder="请输入商品详细介绍..."
                   :height="300"
-                  @change="handleContentChange"
                 />
               </div>
             </div>
@@ -357,7 +326,13 @@
           <div class="form-row">
             <div class="form-item">
               <label><span class="required">*</span> 市场价</label>
-              <input type="text" v-model="formData.marketPrice" required placeholder="0">
+              <input
+                type="text"
+                v-model.number="formData.marketPrice"
+                @input="validateNumericInput"
+                required
+                placeholder="0"
+              >
             </div>
           </div>
 
@@ -437,14 +412,10 @@
               <label>库存设置</label>
               <div class="checkbox-group">
                 <label class="checkbox-item">
-                  <input type="checkbox" v-model="formData.stockSettings" value="noStock">
-                  <span class="checkbox-square"></span>
-                  <span class="checkbox-text">无库存</span>
-                </label>
-                <label class="checkbox-item">
                   <input type="checkbox" v-model="formData.stockSettings" value="autoOrder">
+                  <span class="checkbox-text">无库存自动下架</span>
                   <span class="checkbox-square"></span>
-                  <span class="checkbox-text">自动下架</span>
+
                 </label>
               </div>
             </div>
@@ -460,16 +431,6 @@
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-item">
-              <label>自动发卡</label>
-              <div class="card-input-group">
-                <span class="card-label">会员卡规则ID</span>
-                <input type="text" v-model="formData.cardRuleId" placeholder="会员卡规则ID">
-                <div class="input-tip orange-tip">用户购买后的该商品以后，系统会自动给用户发放该会员卡</div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- 规格信息 -->
@@ -498,73 +459,265 @@
     </div>
   </div>
 </template>
-<script setup>
-import { reactive } from 'vue'
+<script>
 import RichTextEditor from '@/components/richtext/RichTextEditor.vue'
+import FileUploader from '@/components/public/FileUploader.vue'
+import { numericInputHandler } from '@/utils/validators'
 
-// 表单数据
-const formData = reactive({
-  // 商店信息
-  province: '',
-  category: '',
+import http from '@/utils/http'
+import { ElMessage } from 'element-plus'
 
-  // 商品基础信息
-  barcode: '',
-  name: '',
-  alias: '',
-  type: 'physical',
-  overseas: 'no',
-  tags: '',
-  purchaseNotes: '',
-  features: '',
+export default {
+  name: 'ProductAdd',
+  components: {
+    RichTextEditor,
+    FileUploader,
 
-  // 物流和模板
-  logisticsTemplate: '',
-  extendedLogisticsTemplate: '',
-  priorityCoupon: '1',
-  sort: '0',
-  recommended: 'no',
-  display: 'yes',
-  afterSaleOptions: [],
-  status: 'online',
+  },
+  data () {
+    return {
+      // 状态
+      productId: null,
+      isEdit: false,
+      loading: false,
 
-  // 视频和图片
-  videoId: '',
-  videoUrl: '',
-  images: [],
+      // 表单数据
+      formData: {
+        // 商店信息
+        store_id: '',
+        category_id: '',
 
-  // 商品详情
-  description: '',
+        // 商品基础信息
+        code: '',
+        name: '',
+        alias: '',
+        type: 'physical',
+        support_overseas_shipping: false,
+        keywords: '',
+        purchase_notice: '',
+        features: '',
 
-  // 价格和库存
-  unit: '份',
-  marketPrice: '',
-  price: '',
-  taxRate: '',
-  requiredPoints: '0',
-  giftPoints: '0',
-  giftPointsType: 'fixed',
-  minPurchase: '1',
-  stock: '',
-  stockWarning: '',
-  stockSettings: [],
-  weight: '',
-  cardRuleId: '',
+        // 物流和模板
+        freight_template_id: '',
+        extend_freight_template_id: '',
+        discount: '1',
+        sort_order: 0,
+        is_recommended: false,
+        display_mode: 'normal',
+        services: [],
+        status: 'online',
 
-  // 规格信息
-  specs: []
-})
+        // 视频和图片
+        video_code: '',
+        video_url: '',
+        images: [],
 
-// 提交表单
-const submitForm = () => {
-  console.log('提交的表单数据:', formData)
-  // 这里添加表单验证和提交到后端的逻辑
-  alert('表单提交成功！')
-}
+        // 商品详情
+        detail: '',
 
-const handleContentChange = (html) => {
-  console.log('商品详情已更新:', html)
-  // 可以在这里做额外的验证或处理
+        // 价格和库存
+        unit: '份',
+        market_price: '',
+        price: '',
+        tax_rate: '',
+        points_required: 0,
+        points_reward: 0,
+        min_purchase_qty: 1,
+        stock: '',
+        stock_alert: '',
+        no_stock_mode: false,
+        auto_offline: false,
+        weight: '',
+        member_card_id: '',
+
+        // 规格信息
+        specifications: [],
+        attributes: [],
+        spec_combinations: []
+      },
+
+      // 选项数据
+      storeOptions: [],
+      categoryOptions: [],
+      imageFileList: []
+    }
+  },
+  created () {
+    this.productId = this.$route.params.id || this.$route.query.id
+    this.isEdit = !!this.productId
+  },
+  mounted () {
+    // 加载基础数据
+    Promise.all([
+      this.fetchDowns(),
+    ]).then(() => {
+      // 基础数据加载完成后，如果是编辑模式再加载详情
+      if (this.isEdit) {
+        this.fetchProductDetail().then(() => {
+          // 数据加载完成后再初始化图片
+          this.initImageData()
+        })
+      }
+    })
+  },
+  methods: {
+    // 获取门店列表
+    validateNumericInput (event) {
+      const result = numericInputHandler(event, (errorMsg) => {
+        this.$message.error(errorMsg)
+      }, {
+        allowNegative: false,
+        allowDecimal: true,
+        decimalDigits: 2
+      })
+      this.formData.marketPrice = result !== null ? result : ''
+    },
+
+    async fetchDowns () {
+      this.storeOptions = await http.get_downs('shop_store')
+      this.categoryOptions = await http.get_downs('shop_product_category')
+    },
+    handleImagesChange (urls) {
+      // console.log('商品图片已更新:', urls)
+    },
+    // 获取商品详情
+    async fetchProductDetail () {
+      this.loading = true
+      try {
+        const response = await http.get(`/api/v1/mini_core/shop-product/${this.productId}`)
+
+        if (response.data && response.data.data) {
+          // 更新表单数据
+          const productData = response.data.data
+
+          // 使用解构赋值更新表单数据
+          Object.keys(productData).forEach(key => {
+            if (productData[key] !== undefined && key in this.formData) {
+              this.formData[key] = productData[key]
+            }
+          })
+
+          // 处理图片数据
+          if (productData.images) {
+            let images = []
+            try {
+              if (typeof productData.images === 'string') {
+                images = JSON.parse(productData.images)
+              } else if (Array.isArray(productData.images)) {
+                images = productData.images
+              }
+
+              this.imageFileList = images.map((url, index) => ({
+                name: `image_${index}`,
+                url
+              }))
+            } catch (e) {
+              console.error('解析图片数据失败:', e)
+            }
+          }
+
+          // 处理其他可能需要解析的JSON字符串字段
+          ['specifications', 'attributes', 'services', 'spec_combinations'].forEach(field => {
+            if (productData[field] && typeof productData[field] === 'string') {
+              try {
+                this.formData[field] = JSON.parse(productData[field])
+              } catch (e) {
+                console.error(`解析${field}数据失败:`, e)
+              }
+            }
+          })
+        }
+      } catch (error) {
+        console.error('获取商品详情失败:', error)
+        ElMessage.error('获取商品详情失败')
+      } finally {
+        this.loading = false
+      }
+    },
+    // 在编辑模式下初始化图片
+
+    initImageData () {
+      if (this.isEdit && this.formData.images) {
+        let images = this.formData.images
+        // 如果是字符串，尝试解析JSON
+        if (typeof images === 'string') {
+          try {
+            images = JSON.parse(images)
+          } catch (e) {
+            console.error('解析图片数据失败:', e)
+            images = []
+          }
+        }
+        // 确保images是数组
+        if (!Array.isArray(images)) {
+          images = []
+        }
+        // 设置到表单数据
+        this.formData.images = images
+      }
+    },
+    // 提交表单
+
+    async submitForm () {
+      // 表单验证
+      if (!this.formData.name) {
+        ElMessage.error('请输入商品名称')
+        return
+      }
+
+      // 处理图片数据
+      if (this.imageFileList.length > 0) {
+        const images = this.imageFileList.map(file => {
+          // 如果是新上传的文件（有 response 字段），使用 response.url
+          if (file.response && file.response.url) {
+            return file.response.url
+          }
+          // 否则使用现有的 url
+          return file.url
+        })
+        this.formData.images = JSON.stringify(images)
+      } else {
+        this.formData.images = JSON.stringify([])
+      }
+
+      // 处理其他需要字符串化的字段
+      ['services', 'attributes', 'specifications', 'spec_combinations'].forEach(field => {
+        if (Array.isArray(this.formData[field])) {
+          this.formData[field] = JSON.stringify(this.formData[field])
+        }
+      })
+
+      this.loading = true
+      try {
+        let response
+
+        if (this.isEdit) {
+          // 编辑模式
+          response = await http.put(`/api/v1/mini_core/shop-product/${this.productId}`, this.formData)
+        } else {
+          // 新增模式
+          response = await http.post('/api/v1/mini_core/shop-product', this.formData)
+        }
+
+        if (response.data && response.data.code === 200) {
+          ElMessage.success(this.isEdit ? '商品更新成功' : '商品添加成功')
+          this.$router.push('/shop/products/list')
+        } else {
+          ElMessage.error(response.data?.message || '操作失败')
+        }
+      } catch (error) {
+        console.error('提交失败:', error)
+        ElMessage.error('提交失败: ' + (error.message || '未知错误'))
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // 取消操作
+    cancel () {
+      this.$router.push('/shop/products/list')
+    }
+  }
 }
 </script>
 
