@@ -34,7 +34,7 @@
             <el-form-item label="省市区" prop="address">
               <AddressSelector
                 mode="region-plus"
-                :default-codes="{ province: storeForm.province }"
+                :default-codes="{ province_code: storeForm.province_code, }"
                 @change="handleAddressChange"
               />
             </el-form-item>
@@ -268,8 +268,9 @@ export default {
         self_pickup_enabled: false,
         dine_in_enabled: false,
         store_category: null,
-        province: '',
-        address: '',
+        province: null,
+        province_code: null,
+        address: null,
         contact_person: '',
         contact_phone: '',
         is_public: false,
@@ -387,8 +388,11 @@ export default {
       city,
       district
     }) {
+
       // 存储完整地址路径
-      this.storeForm.province = `${province.code}/${city.code}/${district.code}`
+      this.storeForm.province = `${province.name}/${city.name}/${district.name}`
+      this.storeForm.province_code = `${province.code}/${city.code}/${district.code}`
+
     },
     async fetchStoreDetail () {
       this.loading = true
