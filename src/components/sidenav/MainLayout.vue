@@ -37,7 +37,7 @@
 
 <script>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import SideNav from '@/components/sidenav/SideNav.vue'
 
 export default {
@@ -47,10 +47,13 @@ export default {
   },
   setup() {
     const route = useRoute()
+    const router = useRouter()
     const isNavCollapsed = ref(false)
     const isUserMenuOpen = ref(false)
-    const userName = ref('用户名') // 替换为实际的用户名，可能需要从API获取
-
+    const userInfo = localStorage.getItem('userInfo')
+    const parsedUserInfo = userInfo ? JSON.parse(userInfo) : { username: '用户名' }
+    const userName = ref(parsedUserInfo.username)
+    
     const toggleUserMenu = () => {
       isUserMenuOpen.value = !isUserMenuOpen.value
     }
@@ -88,8 +91,17 @@ export default {
     const logout = () => {
       // 实现登出逻辑，例如清除token、重定向到登录页等
       console.log('用户登出')
-      // localStorage.removeItem('token')
-      // router.push('/login')
+      // 清理所有认证相关信息
+      localStorage.removeItem('token')
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('isLogin')
+      localStorage.removeItem('userInfo')
+      
+      // 关闭下拉菜单
+      isUserMenuOpen.value = false
+      
+      // 使用router进行导航
+      router.push('/login')
     }
 
     return  {

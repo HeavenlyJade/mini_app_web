@@ -32,8 +32,7 @@ import axios from "axios";
 
 // 获取全局属性
 const { proxy } = getCurrentInstance() || { proxy: null };
-const baseApi = proxy?.$baseApi || '';
-const apiUrls = proxy?.$apiUrl || {};
+
 
 // 登录表单数据
 const userItem = ref({
@@ -48,10 +47,10 @@ const loginForm = ref<FormInstance>();
 // 表单验证规则
 const rules = reactive({
   username: [
-    {required: true, message: '请输入账号', trigger: 'blur'},
+    { required: true, message: '请输入账号', trigger: 'blur' },
   ],
   password: [
-    {required: true, message: '请输入密码', trigger: 'blur'},
+    { required: true, message: '请输入密码', trigger: 'blur' },
   ],
 });
 
@@ -66,9 +65,9 @@ async function login() {
         // 使用全局API变量
         // 调用登录API
         const response = await axios.post('/api/v1/users/login', {
-  username: userItem.value.username,
-  password: userItem.value.password
-});
+          username: userItem.value.username,
+          password: userItem.value.password
+        });
         console.log(response)
         // 处理登录成功响应
         if (response.data) {
@@ -128,6 +127,7 @@ onMounted(() => {
 
 .login-left {
   flex: 1;
+
   img {
     width: 100%;
     height: 100%;
