@@ -2,7 +2,6 @@
   <div class="page-container">
     <!-- Page Header -->
     <div class="page-header">
-      <h2 class="page-title">门店分类管理</h2>
       <div class="header-actions">
         <el-button type="primary" icon="el-icon-plus" @click="showAddCategoryDialog">添加</el-button>
         <el-button type="danger" icon="el-icon-delete" :disabled="!hasSelection" @click="handleBatchDelete">批量删除

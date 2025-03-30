@@ -10,8 +10,20 @@
         <button class="toggle-nav-btn" @click="toggleNav">
           <i :class="['toggle-icon', isNavCollapsed ? 'expand-icon' : 'collapse-icon']"></i>
         </button>
-        <div class="page-title">
-          {{ pageTitle }}
+        <h1 class="page-title">{{ pageTitle }}</h1>
+        <div class="user-dropdown">
+          <button class="user-btn" @click="toggleUserMenu">
+            {{ userName }}
+            <i class="dropdown-icon" :class="{ 'dropdown-open': isUserMenuOpen }"></i>
+          </button>
+
+          <!-- 下拉菜单 -->
+          <div class="dropdown-menu" v-show="isUserMenuOpen">
+            <router-link to="/" class="menu-item">首页</router-link>
+            <router-link to="/profile" class="menu-item">修改密码</router-link>
+            <div class="menu-item logout" @click="logout">切换账号</div>
+            <div class="menu-item logout" @click="logout">退出</div>
+          </div>
         </div>
       </div>
 
@@ -36,7 +48,12 @@ export default {
   setup() {
     const route = useRoute()
     const isNavCollapsed = ref(false)
+    const isUserMenuOpen = ref(false)
+    const userName = ref('用户名') // 替换为实际的用户名，可能需要从API获取
 
+    const toggleUserMenu = () => {
+      isUserMenuOpen.value = !isUserMenuOpen.value
+    }
     // 根据路由元数据获取页面标题
     const pageTitle = computed(() => {
       return route.meta.title || '页面'
@@ -48,6 +65,12 @@ export default {
       if (savedState !== null) {
         isNavCollapsed.value = savedState === 'true'
       }
+      document.addEventListener('click', (e) => {
+        const userDropdown = document.querySelector('.user-dropdown')
+        if (userDropdown && !userDropdown.contains(e.target) && isUserMenuOpen.value) {
+          isUserMenuOpen.value = false
+        }
+      })
     })
 
     // 切换侧边栏状态
@@ -61,12 +84,23 @@ export default {
       isNavCollapsed.value = newState
       localStorage.setItem('navCollapsed', newState.toString())
     }
+    // 退出登录
+    const logout = () => {
+      // 实现登出逻辑，例如清除token、重定向到登录页等
+      console.log('用户登出')
+      // localStorage.removeItem('token')
+      // router.push('/login')
+    }
 
-    return {
-      isNavCollapsed,
-      pageTitle,
-      toggleNav,
-      updateCollapsedState
+    return  {
+        isNavCollapsed,
+        pageTitle,
+        toggleNav,
+        updateCollapsedState,
+        isUserMenuOpen,
+        userName,
+        toggleUserMenu,
+        logout
     }
   }
 }
@@ -97,7 +131,8 @@ export default {
 }
 
 .content-expanded {
-  margin-left: -116px; /* 180px - 64px, 侧边栏展开宽度和收缩宽度的差值 */
+  margin-left: 0;
+  /* 180px - 64px, 侧边栏展开宽度和收缩宽度的差值 */
 }
 
 .top-bar {
@@ -105,9 +140,17 @@ export default {
   align-items: center;
   padding: 15px 0;
   margin-bottom: 15px;
+  justify-content: space-between;
+  /* 修改为两端对齐 */
+
 }
 
 .toggle-nav-btn {
+  position: relative;
+  /* 添加相对定位 */
+  z-index: 101;
+  /* 确保按钮在最上层，高于侧边栏 */
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -150,5 +193,74 @@ export default {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   padding: 20px;
   margin-bottom: 20px;
+}
+
+
+.user-dropdown {
+  position: relative;
+  margin-left: auto;
+  /* 将用户按钮推到右侧 */
+}
+
+
+.user-btn {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #333;
+  border-radius: 4px;
+}
+
+.user-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.dropdown-icon {
+  margin-left: 5px;
+  border: solid #666;
+  border-width: 0 2px 2px 0;
+  display: inline-block;
+  padding: 3px;
+  transform: rotate(45deg);
+  transition: transform 0.2s;
+}
+
+.dropdown-icon.dropdown-open {
+  transform: rotate(-135deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 150px;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.menu-item {
+  display: block;
+  padding: 12px 16px;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  text-align: center;
+  transition: background 0.2s;
+}
+
+.menu-item:hover {
+  background-color: #f7f7f7;
+}
+
+.logout {
+  color: #f56c6c;
+  cursor: pointer;
 }
 </style>

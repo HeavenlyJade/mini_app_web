@@ -4,7 +4,6 @@
     <div class="page-header">
       <h2 class="page-title">门店管理</h2>
     </div>
-
     <!-- 搜索和操作区域 -->
     <div class="page-content">
       <!-- 搜索表单 -->
