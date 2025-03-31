@@ -29,13 +29,13 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/shop/store/store_category_manage.vue'),
         meta: { title: '门店分类' }
       },
-           {
+      {
         path: '/shop/store/list',
         name: 'store_list',
         component: () => import('@/views/shop/store/store_manage.vue'),
         meta: { title: '门店列表' }
       },
-           {
+      {
         path: '/shop/store/add',
         name: 'store_add',
         component: () => import('@/views/shop/store/store_add.vue'),
@@ -45,13 +45,13 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/shop/products/categories',
         name: 'shop_type',
-        component: () => import('@/views/shop/shop_product_type.vue'),
+        component: () => import('@/views/shop/merchandise/shop_product_type.vue'),
         meta: { title: '商品分类' }
       },
       {
         path: '/shop/products/categories/add',
         name: 'shop_type_add',
-        component: () => import('@/views/shop/shop_product_type_add.vue'),
+        component: () => import('@/views/shop/merchandise/shop_product_type_add.vue'),
         meta: { title: '商品分类添加' }
       },
       {

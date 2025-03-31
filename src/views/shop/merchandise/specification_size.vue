@@ -30,11 +30,7 @@
 
     <!-- 数据表格 - 只在有标签页数据时显示 -->
     <template v-if="specData.length > 0">
-      <el-table
-        :data="currentTabData"
-        style="width: 100%"
-        v-loading="tableLoading"
-        element-loading-text="加载中..."
+      <el-table :data="currentTabData" style="width: 100%" v-loading="tableLoading" element-loading-text="加载中..."
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column prop="name" label="属性名称" width="180"></el-table-column>
@@ -58,11 +54,7 @@
     </template>
 
     <!-- 添加规格尺寸类别对话框 -->
-    <el-dialog
-      title="增加规格尺寸"
-      v-model="categoryDialogVisible"
-      width="50%"
-      :close-on-click-modal="false"
+    <el-dialog title="增加规格尺寸" v-model="categoryDialogVisible" width="50%" :close-on-click-modal="false"
       @close="resetCategoryForm">
       <el-form :model="categoryForm" :rules="categoryRules" ref="categoryForm" label-width="80px">
         <el-form-item label="名称" prop="name">
@@ -85,12 +77,8 @@
     </el-dialog>
 
     <!-- 添加/编辑规格尺寸子项对话框 -->
-    <el-dialog
-      :title="dialogType === 'add' ? '增加子项' : '修改子项'"
-      v-model="dialogVisible"
-      width="50%"
-      :close-on-click-modal="false"
-      @close="resetForm">
+    <el-dialog :title="dialogType === 'add' ? '增加子项' : '修改子项'" v-model="dialogVisible" width="50%"
+      :close-on-click-modal="false" @close="resetForm">
       <el-form :model="form" :rules="rules" ref="specForm" label-width="80px">
         <el-form-item label="名称" prop="name">
           <el-input v-model="form.name" :placeholder="dialogType === 'add' ? '请输入名称' : form.name"></el-input>
@@ -109,12 +97,7 @@
             <el-input v-model="prop.key" placeholder="属性键" class="extended-prop-input"></el-input>
             <span class="prop-separator">:</span>
             <el-input v-model="prop.value" placeholder="属性值" class="extended-prop-input"></el-input>
-            <el-button
-              type="danger"
-              icon="el-icon-delete"
-              circle
-              size="mini"
-              class="remove-prop-btn"
+            <el-button type="danger" icon="el-icon-delete" circle size="mini" class="remove-prop-btn"
               @click="removeExtendedProp(idx)"></el-button>
           </div>
           <el-button type="primary" size="small" icon="el-icon-plus" class="add-prop-btn" @click="addExtendedProp">
@@ -139,12 +122,7 @@
 
     <!-- 离线状态提示 -->
     <div class="offline-alert" v-if="isOffline">
-      <el-alert
-        title="网络连接已断开"
-        type="error"
-        :closable="false"
-        description="当前处于离线状态，无法保存数据。请检查网络连接后刷新页面。"
-        show-icon>
+      <el-alert title="网络连接已断开" type="error" :closable="false" description="当前处于离线状态，无法保存数据。请检查网络连接后刷新页面。" show-icon>
       </el-alert>
     </div>
   </div>
@@ -229,7 +207,7 @@ export default {
   },
   computed: {
     // 获取当前标签页的数据
-    currentTabData() {
+    currentTabData () {
       if (this.activeTab !== undefined && this.specData[this.activeTab]) {
         return this.specData[this.activeTab].value || [];
       }
@@ -245,37 +223,37 @@ export default {
 
     // 从服务器获取规格尺寸列表
     fetchSpecData() {
-  // 显示加载状态
-  this.loading = true;
+      // 显示加载状态
+      this.loading = true;
 
-  // 发送请求获取数据
-  return axios.get('/api/spec-dimensions')
-    .then(response => {
-      // 检查响应数据格式
-      if (response.data && Array.isArray(response.data)) {
-        this.specData = response.data;
+      // 发送请求获取数据
+      return axios.get('/api/spec-dimensions')
+        .then(response => {
+          // 检查响应数据格式
+          if (response.data && Array.isArray(response.data)) {
+            this.specData = response.data;
 
-        // 如果有数据，默认选中第一个标签页
-        if (this.specData.length > 0) {
-          this.activeTab = '0';
-        }
-      } else {
-        // 后端返回的数据格式不正确，使用默认空数据
-        console.error('获取规格尺寸列表返回的数据格式不正确');
-        this.specData = [];
-        this.$message.error('获取规格尺寸数据格式不正确');
-      }
-    })
-    .catch(error => {
-      console.error('获取规格尺寸列表失败:', error);
-      // 重要：设置默认空数组，而不是保持之前的状态
-      this.specData = [];
-      this.$message.error('获取规格尺寸列表失败，请刷新页面重试');
-    })
-    .finally(() => {
-      this.loading = false;
-    });
-},
+            // 如果有数据，默认选中第一个标签页
+            if (this.specData.length > 0) {
+              this.activeTab = '0';
+            }
+          } else {
+            // 后端返回的数据格式不正确，使用默认空数据
+            console.error('获取规格尺寸列表返回的数据格式不正确');
+            this.specData = [];
+            this.$message.error('获取规格尺寸数据格式不正确');
+          }
+        })
+        .catch(error => {
+          console.error('获取规格尺寸列表失败:', error);
+          // 重要：设置默认空数组，而不是保持之前的状态
+          this.specData = [];
+          this.$message.error('获取规格尺寸列表失败，请刷新页面重试');
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
 
     // 添加新的规格尺寸类别
     addSpecCategory(category) {
@@ -595,7 +573,7 @@ export default {
   justify-content: flex-start;
   margin-bottom: 15px;
 
-  .el-button + .el-button {
+  .el-button+.el-button {
     margin-left: 10px;
   }
 }
@@ -741,7 +719,7 @@ export default {
   display: flex;
   justify-content: flex-end;
 
-  .el-button + .el-button {
+  .el-button+.el-button {
     margin-left: 10px;
   }
 }

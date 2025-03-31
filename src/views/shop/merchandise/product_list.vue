@@ -29,15 +29,8 @@
 
         <div class="right-actions">
           <div class="search-wrapper">
-            <input
-              type="text"
-              class="search-input"
-              placeholder="商品名称/编号/关键词"
-              v-model="searchQuery"
-              @focus="showSearchDropdown = true"
-              @blur="onSearchBlur"
-              @keyup.enter="searchProducts"
-            />
+            <input type="text" class="search-input" placeholder="商品名称/编号/关键词" v-model="searchQuery"
+              @focus="showSearchDropdown = true" @blur="onSearchBlur" @keyup.enter="searchProducts" />
             <button class="search-btn" @click="searchProducts">
               <i class="search-icon"></i>
             </button>
@@ -58,13 +51,8 @@
 
       <!-- 状态标签 -->
       <div class="status-tabs">
-        <div
-          v-for="(tab, index) in statusTabs"
-          :key="index"
-          class="status-tab"
-          :class="{ active: activeTab === tab.value }"
-          @click="changeTab(tab.value)"
-        >
+        <div v-for="(tab, index) in statusTabs" :key="index" class="status-tab"
+          :class="{ active: activeTab === tab.value }" @click="changeTab(tab.value)">
           {{ tab.label }}
         </div>
       </div>
@@ -77,79 +65,76 @@
         </div>
         <table v-else>
           <thead>
-          <tr>
-            <th class="checkbox-col">
-              <input type="checkbox" v-model="selectAll" @change="toggleSelectAll"/>
-            </th>
-            <th class="image-col">图片</th>
-            <th class="code-col">编号/条码</th>
-            <th class="name-col">名称</th>
-            <th class="category-col">商品分类</th>
-            <th class="shop-col">所属门店</th>
-            <th class="store-col">门店/分类</th>
-            <th class="stock-col">库存/状态</th>
-            <th class="price-col">价格</th>
-            <th class="actions-col">操作</th>
-          </tr>
+            <tr>
+              <th class="checkbox-col">
+                <input type="checkbox" v-model="selectAll" @change="toggleSelectAll" />
+              </th>
+              <th class="image-col">图片</th>
+              <th class="code-col">编号/条码</th>
+              <th class="name-col">名称</th>
+              <th class="category-col">商品分类</th>
+              <th class="shop-col">所属门店</th>
+              <th class="store-col">门店/分类</th>
+              <th class="stock-col">库存/状态</th>
+              <th class="price-col">价格</th>
+              <th class="actions-col">操作</th>
+            </tr>
           </thead>
           <tbody>
-          <tr v-if="productList.length === 0">
-            <td colspan="10" class="empty-table">
-              <div class="empty-message">
-                <i class="empty-icon"></i>
-                <p>暂无商品数据</p>
-              </div>
-            </td>
-          </tr>
-          <tr v-for="(product, index) in productList" :key="product.id || index">
-            <td class="checkbox-col">
-              <input
-                type="checkbox"
-                :value="product.id"
-                v-model="selectedProducts"
-              />
-            </td>
-            <td class="image-col">
-              <img v-if="product.images" :src="getFirstImage(product.images)" :alt="product.name || '商品图片'" class="product-image"/>
-              <div v-else class="no-image">无图片</div>
-            </td>
-            <td class="code-col">
-              {{ product.code || '暂无编号' }}<br/>
-              <span class="secondary-text">{{ product.barcode || '-' }}</span>
-            </td>
-            <td class="name-col">
-              <div class="product-name">
-                <span v-if="product.is_recommended" class="tag recommended">[推荐]</span>
-                {{ product.name || '未命名商品' }}
-              </div>
-            </td>
-            <td class="category-col">{{ getCategoryName(product.category_id) }}</td>
-            <td class="shop-col">{{ product.shop || '-' }}</td>
-            <td class="store-col">{{ product.store_category || '-' }}</td>
-            <td class="stock-col">
-              {{ product.stock || 0 }}
-              <div class="status-badge" :class="getStatusClass(product.status)">
-                {{ getStatusText(product.status) }}
-              </div>
-            </td>
-            <td class="price-col">
-              <span class="price">¥ {{ product.price || 0 }}</span>
-              <span class="original-price" v-if="product.market_price && product.market_price > product.price">
-                ¥ {{ product.market_price }}
-              </span>
-            </td>
-            <td class="actions-col">
-              <button class="btn-icon edit" @click="handleEdit(product)">
-                <i class="edit-icon"></i>
-              </button>
-              <button class="btn-icon view" @click="handleView(product)">
-                <i class="view-icon"></i>
-              </button>
-              <button class="btn-icon delete" @click="handleDelete(product)">
-                <i class="delete-icon"></i>
-              </button>
-            </td>
-          </tr>
+            <tr v-if="productList.length === 0">
+              <td colspan="10" class="empty-table">
+                <div class="empty-message">
+                  <i class="empty-icon"></i>
+                  <p>暂无商品数据</p>
+                </div>
+              </td>
+            </tr>
+            <tr v-for="(product, index) in productList" :key="product.id || index">
+              <td class="checkbox-col">
+                <input type="checkbox" :value="product.id" v-model="selectedProducts" />
+              </td>
+              <td class="image-col">
+                <img v-if="product.images" :src="getFirstImage(product.images)" :alt="product.name || '商品图片'"
+                  class="product-image" />
+                <div v-else class="no-image">无图片</div>
+              </td>
+              <td class="code-col">
+                {{ product.code || '暂无编号' }}<br />
+                <span class="secondary-text">{{ product.barcode || '-' }}</span>
+              </td>
+              <td class="name-col">
+                <div class="product-name">
+                  <span v-if="product.is_recommended" class="tag recommended">[推荐]</span>
+                  {{ product.name || '未命名商品' }}
+                </div>
+              </td>
+              <td class="category-col">{{ getCategoryName(product.category_id) }}</td>
+              <td class="shop-col">{{ product.shop || '-' }}</td>
+              <td class="store-col">{{ product.store_category || '-' }}</td>
+              <td class="stock-col">
+                {{ product.stock || 0 }}
+                <div class="status-badge" :class="getStatusClass(product.status)">
+                  {{ getStatusText(product.status) }}
+                </div>
+              </td>
+              <td class="price-col">
+                <span class="price">¥ {{ product.price || 0 }}</span>
+                <span class="original-price" v-if="product.market_price && product.market_price > product.price">
+                  ¥ {{ product.market_price }}
+                </span>
+              </td>
+              <td class="actions-col">
+                <button class="btn-icon edit" @click="handleEdit(product)">
+                  <i class="edit-icon"></i>
+                </button>
+                <button class="btn-icon view" @click="handleView(product)">
+                  <i class="view-icon"></i>
+                </button>
+                <button class="btn-icon delete" @click="handleDelete(product)">
+                  <i class="delete-icon"></i>
+                </button>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -166,41 +151,23 @@
           </select>
         </div>
         <div class="pagination-controls">
-          <button
-            class="pagination-btn prev"
-            :disabled="currentPage === 1"
-            @click="changePage(currentPage - 1)"
-          >
+          <button class="pagination-btn prev" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
             &lt;
           </button>
           <div class="page-numbers">
-            <div
-              v-for="page in displayPages"
-              :key="page"
-              class="page-number"
-              :class="{ active: currentPage === page }"
-              @click="changePage(page)"
-            >
+            <div v-for="page in displayPages" :key="page" class="page-number" :class="{ active: currentPage === page }"
+              @click="changePage(page)">
               {{ page }}
             </div>
           </div>
-          <button
-            class="pagination-btn next"
-            :disabled="currentPage === totalPages"
-            @click="changePage(currentPage + 1)"
-          >
+          <button class="pagination-btn next" :disabled="currentPage === totalPages"
+            @click="changePage(currentPage + 1)">
             &gt;
           </button>
           <div class="jump-page">
             Go to
-            <input
-              type="number"
-              v-model="jumpToPage"
-              @keyup.enter="jumpTo"
-              class="jump-input"
-              min="1"
-              :max="totalPages"
-            />
+            <input type="number" v-model="jumpToPage" @keyup.enter="jumpTo" class="jump-input" min="1"
+              :max="totalPages" />
           </div>
         </div>
       </div>
@@ -412,7 +379,7 @@ export default {
         start = Math.max(1, end - 4)
       }
 
-      return Array.from({length: end - start + 1}, (_, i) => start + i)
+      return Array.from({ length: end - start + 1 }, (_, i) => start + i)
     })
 
     // 切换状态标签
@@ -644,7 +611,8 @@ export default {
   margin-bottom: 16px;
 }
 
-.left-actions, .right-actions {
+.left-actions,
+.right-actions {
   display: flex;
   gap: 10px;
 }
@@ -785,7 +753,8 @@ export default {
     border-collapse: collapse;
   }
 
-  th, td {
+  th,
+  td {
     padding: 12px 8px;
     text-align: center;
     border-bottom: 1px solid #ebeef5;
@@ -807,7 +776,9 @@ export default {
     border: 1px solid #eee;
   }
 
-  .code-col, .shop-col, .store-col {
+  .code-col,
+  .shop-col,
+  .store-col {
     width: 100px;
   }
 
@@ -820,7 +791,8 @@ export default {
     width: 120px;
   }
 
-  .stock-col, .price-col {
+  .stock-col,
+  .price-col {
     width: 100px;
   }
 

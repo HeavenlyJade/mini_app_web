@@ -471,8 +471,7 @@ export default {
   name: 'ProductAdd',
   components: {
     RichTextEditor,
-    FileUploader,
-
+    FileUploader
   },
   data () {
     return {

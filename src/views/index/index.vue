@@ -189,7 +189,7 @@
 import { onMounted } from 'vue'
 
 // 加载仪表盘数据
-function loadDashboardData() {
+function loadDashboardData () {
   // 这里可以调用API获取实际数据
   console.log('Loading dashboard data...')
 }

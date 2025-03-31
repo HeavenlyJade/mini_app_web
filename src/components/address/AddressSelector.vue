@@ -87,7 +87,7 @@ export default {
         const districtValue = codeParts.length > 2 ? codeParts[2] : null
 
         // 设置默认选中的省市区
-        let selectedValues = []
+        const selectedValues = []
 
         // 添加省份编码
         if (provinceValue) {

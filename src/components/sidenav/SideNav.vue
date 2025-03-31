@@ -1,5 +1,5 @@
 <template>
-  <div class="sidebar-container" :class="{'collapsed': isCollapsed}">
+  <div class="sidebar-container" :class="{ 'collapsed': isCollapsed }">
     <div class="sidebar-menu">
       <!-- 所有菜单项使用统一的渲染方式 -->
       <div v-for="(menuItem, index) in menuItems" :key="index" class="menu-group">
@@ -9,17 +9,14 @@
             <span>{{ menuItem.title }}</span>
           </div>
           <!-- 使用Unicode字符的箭头实现 -->
-          <span class="arrow-container"
-               v-if="menuItem.children && menuItem.children.length > 0">
-            <span class="arrow" :class="{'arrow-down': submenuOpen[index]}"></span>
+          <span class="arrow-container" v-if="menuItem.children && menuItem.children.length > 0">
+            <span class="arrow" :class="{ 'arrow-down': submenuOpen[index] }"></span>
           </span>
         </div>
 
         <div class="submenu" v-show="submenuOpen[index] && menuItem.children && menuItem.children.length > 0">
-          <div v-for="(subItem, subIndex) in menuItem.children" :key="subIndex"
-               class="submenu-item"
-               :class="{ 'active': currentPath === subItem.path }"
-               @click="navigateTo(subItem.path)">
+          <div v-for="(subItem, subIndex) in menuItem.children" :key="subIndex" class="submenu-item"
+            :class="{ 'active': currentPath === subItem.path }" @click="navigateTo(subItem.path)">
             <i :class="['nav-icon', subItem.icon]"></i>
             <span>{{ subItem.title }}</span>
           </div>
@@ -30,8 +27,8 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, reactive, ref, watch} from 'vue'
-import {useRoute, useRouter} from 'vue-router'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 // 接收父组件传递的折叠状态
 const props = defineProps({
@@ -88,7 +85,7 @@ const menuItems = ref([
         icon: 'list-icon',
         path: '/shop/store_category/list'
       },
-          {
+      {
         title: '门店管理',
         icon: 'list-icon',
         path: '/shop/store/list'
@@ -115,11 +112,6 @@ const menuItems = ref([
         path: '/shop/products/categories'
       },
       {
-        title: '商品类型',
-        icon: 'type-icon',
-        path: '/products/types'
-      },
-            {
         title: '规格尺寸',
         icon: 'type-icon',
         path: '/shop/products/specification_size'
@@ -373,7 +365,8 @@ onMounted(() => {
   justify-content: center;
   width: 20px;
   height: 20px;
-  pointer-events: none; /* 防止鼠标悬停效果 */
+  pointer-events: none;
+  /* 防止鼠标悬停效果 */
 }
 
 .arrow {
@@ -384,13 +377,15 @@ onMounted(() => {
 }
 
 .arrow:after {
-  content: '▶'; /* 使用Unicode右箭头字符 */
+  content: '▶';
+  /* 使用Unicode右箭头字符 */
   display: block;
 }
 
 /* 箭头展开状态 */
 .arrow.arrow-down {
-  transform: rotate(90deg); /* 旋转90度指向下方 */
+  transform: rotate(90deg);
+  /* 旋转90度指向下方 */
 }
 
 .submenu {
