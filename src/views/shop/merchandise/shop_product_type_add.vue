@@ -10,25 +10,25 @@
       <div class="form-container">
         <div class="form-item">
           <label class="required">名称</label>
-          <input type="text" v-model="categoryForm.name" class="form-input" placeholder="请输入分类名称">
+          <input link v-model="categoryForm.name" class="form-input" placeholder="请输入分类名称">
         </div>
 
         <div class="form-item">
           <label>备注</label>
-          <input type="text" v-model="categoryForm.remark" class="form-input" placeholder="请输入备注信息">
+          <input link v-model="categoryForm.remark" class="form-input" placeholder="请输入备注信息">
         </div>
 
         <div class="form-item">
           <label>类型</label>
           <div class="input-with-hint">
-            <input type="text" v-model="categoryForm.type" class="form-input" placeholder="请输入类型">
+            <input link v-model="categoryForm.type" class="form-input" placeholder="请输入类型">
             <span class="input-hint">自定义类型，32个字以内</span>
           </div>
         </div>
 
         <div class="form-item">
           <label>所属门店</label>
-          <input type="text" v-model="categoryForm.store_id" class="form-input" placeholder="所属门店">
+          <input link v-model="categoryForm.store_id" class="form-input" placeholder="所属门店">
         </div>
 
         <div class="form-item">
@@ -44,7 +44,7 @@
         <div class="form-item">
           <label>编号</label>
           <div class="input-with-hint">
-            <input type="text" v-model="categoryForm.code" class="form-input" placeholder="请输入编号">
+            <input link v-model="categoryForm.code" class="form-input" placeholder="请输入编号">
             <span class="input-hint">自定义编号，32个字符以内</span>
           </div>
         </div>
@@ -106,15 +106,15 @@
           <label>扩展属性</label>
           <div class="extension-properties">
             <div class="input-group" v-for="(prop, index) in customProperties" :key="index">
-              <input type="text" class="form-input" placeholder="属性名称" v-model="prop.key">
+              <input link class="form-input" placeholder="属性名称" v-model="prop.key">
               <span class="separator">:</span>
-              <input type="text" class="form-input" placeholder="属性值" v-model="prop.value">
+              <input link class="form-input" placeholder="属性值" v-model="prop.value">
               <button class="remove-btn red" @click="removeProperty(index)">删除</button>
             </div>
             <div class="input-group">
-              <input type="text" class="form-input" placeholder="属性名称" v-model="newProperty.key">
+              <input link class="form-input" placeholder="属性名称" v-model="newProperty.key">
               <span class="separator">:</span>
-              <input type="text" class="form-input" placeholder="属性值" v-model="newProperty.value">
+              <input link class="form-input" placeholder="属性值" v-model="newProperty.value">
               <button class="add-btn green" @click="addProperty">添加</button>
             </div>
           </div>

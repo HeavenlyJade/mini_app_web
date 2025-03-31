@@ -625,53 +625,8 @@ export default {
 
     // 移除标签页
     removeTab(targetName) {
-      // 获取要删除的规格ID
-      const specIndex = parseInt(targetName);
-      const specToDelete = this.specData[specIndex];
-      
-      this.$confirm('删除无法恢复，是否继续?', '提示', {
-        confirmButtonText: '提交',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        // 调用删除接口
-        return http.delete(`/api/v1/mini_core/shop-specification/${specToDelete.id}`)
-          .then(() => {
-            // 删除成功后更新数据
-            this.specData.splice(specIndex, 1);
-            
-            // 如果删除的是当前激活的标签页，需要切换到其他标签页
-            if (this.activeTab === targetName) {
-              let newActiveTab;
-              if (this.specData.length >= specIndex + 1) {
-                // 如果后面还有标签，切换到下一个
-                newActiveTab = specIndex.toString();
-              } else if (specIndex > 0) {
-                // 否则切换到前一个
-                newActiveTab = (specIndex - 1).toString();
-              } else {
-                // 如果没有标签了，设为空
-                newActiveTab = '';
-              }
-              this.activeTab = newActiveTab;
-            }
-            
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            });
-          })
-          .catch(error => {
-            console.error('删除规格失败:', error);
-            this.$message.error('删除失败，请重试');
-          });
-      }).catch(() => {
-        // 用户点击取消
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        });
-      });
+      // 实现标签页移除逻辑
+      console.log(`移除标签页: ${targetName}`);
     }
   }
 };

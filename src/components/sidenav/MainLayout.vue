@@ -20,7 +20,7 @@
           <!-- 下拉菜单 -->
           <div class="dropdown-menu" v-show="isUserMenuOpen">
             <router-link to="/" class="menu-item">首页</router-link>
-            <router-link to="/profile" class="menu-item">修改密码</router-link>
+            <router-link to="/profile" class="menu-item">个人信息</router-link>
             <div class="menu-item logout" @click="logout">切换账号</div>
             <div class="menu-item logout" @click="logout">退出</div>
           </div>
@@ -53,7 +53,7 @@ export default {
     const userInfo = localStorage.getItem('userInfo')
     const parsedUserInfo = userInfo ? JSON.parse(userInfo) : { username: '用户名' }
     const userName = ref(parsedUserInfo.username)
-    
+
     const toggleUserMenu = () => {
       isUserMenuOpen.value = !isUserMenuOpen.value
     }
@@ -96,23 +96,23 @@ export default {
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('isLogin')
       localStorage.removeItem('userInfo')
-      
+
       // 关闭下拉菜单
       isUserMenuOpen.value = false
-      
+
       // 使用router进行导航
       router.push('/login')
     }
 
-    return  {
-        isNavCollapsed,
-        pageTitle,
-        toggleNav,
-        updateCollapsedState,
-        isUserMenuOpen,
-        userName,
-        toggleUserMenu,
-        logout
+    return {
+      isNavCollapsed,
+      pageTitle,
+      toggleNav,
+      updateCollapsedState,
+      isUserMenuOpen,
+      userName,
+      toggleUserMenu,
+      logout
     }
   }
 }

@@ -21,7 +21,7 @@
             </div>
             <div class="form-item">
               <label>门店ID</label>
-              <input type="text" v-model="searchForm.storeId" class="form-input" placeholder="请输入门店ID">
+              <input link v-model="searchForm.storeId" class="form-input" placeholder="请输入门店ID">
             </div>
             <div class="form-item">
               <label>状态</label>
@@ -44,11 +44,11 @@
           <div class="form-row">
             <div class="form-item">
               <label>门店名称</label>
-              <input type="text" v-model="searchForm.name" class="form-input" placeholder="请输入门店名称">
+              <input link v-model="searchForm.name" class="form-input" placeholder="请输入门店名称">
             </div>
             <div class="form-item">
               <label>地址</label>
-              <input type="text" v-model="searchForm.address" class="form-input" placeholder="请输入地址关键词">
+              <input link v-model="searchForm.address" class="form-input" placeholder="请输入地址关键词">
             </div>
             <div class="form-item date-range">
               <label>创建时间</label>
@@ -188,7 +188,7 @@
           </button>
           <div class="pagination-jump">
             <span>前往</span>
-            <input type="text" v-model.number="jumpPage" class="jump-input">
+            <input link v-model.number="jumpPage" class="jump-input">
             <span>页</span>
             <button class="jump-btn" @click="handleJumpPage">确定</button>
           </div>

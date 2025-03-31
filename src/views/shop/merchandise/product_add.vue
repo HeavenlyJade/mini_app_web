@@ -47,7 +47,7 @@
             <div class="form-item">
               <label>商品条码</label>
               <div class="input-with-tip">
-                <input type="text" v-model="formData.barcode" placeholder="商品条码">
+                <input link v-model="formData.barcode" placeholder="商品条码">
                 <div class="input-tip">建议配合扫码枪使用</div>
               </div>
             </div>
@@ -56,14 +56,14 @@
           <div class="form-row">
             <div class="form-item">
               <label><span class="required">*</span> 商品名称</label>
-              <input type="text" v-model="formData.name" required placeholder="商品名称">
+              <input link v-model="formData.name" required placeholder="商品名称">
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-item">
               <label>别名</label>
-              <input type="text" v-model="formData.alias" placeholder="商品别名">
+              <input link v-model="formData.alias" placeholder="商品别名">
             </div>
           </div>
 
@@ -107,7 +107,7 @@
             <div class="form-item">
               <label>标签(关键词)</label>
               <div class="input-with-tip">
-                <input type="text" v-model="formData.tags" placeholder="标签/关键词">
+                <input link v-model="formData.tags" placeholder="标签/关键词">
                 <div class="input-tip">多个标签用逗号隔开</div>
               </div>
             </div>
@@ -117,9 +117,9 @@
           <!--            <div class="form-item">-->
           <!--              <label>扩展属性</label>-->
           <!--              <div class="attributes-container">-->
-          <!--                <input type="text" class="attribute-input" placeholder="扩展属性名">-->
+          <!--                <input link class="attribute-input" placeholder="扩展属性名">-->
           <!--                <span class="attribute-separator">:</span>-->
-          <!--                <input type="text" class="attribute-input" placeholder="扩展属性值">-->
+          <!--                <input link class="attribute-input" placeholder="扩展属性值">-->
           <!--                <button type="button" class="add-btn">添加</button>-->
           <!--              </div>-->
           <!--            </div>-->
@@ -179,7 +179,7 @@
             <div class="form-item">
               <label><span class="required">*</span> 优先券</label>
               <div class="input-with-tip">
-                <input type="text" v-model="formData.priorityCoupon" required>
+                <input link v-model="formData.priorityCoupon" required>
                 <div class="input-tip orange-tip">最多可使用1张优惠券</div>
               </div>
             </div>
@@ -188,7 +188,7 @@
           <div class="form-row">
             <div class="form-item">
               <label>排序</label>
-              <input type="text" v-model="formData.sort" placeholder="0">
+              <input link v-model="formData.sort" placeholder="0">
             </div>
           </div>
 
@@ -277,7 +277,7 @@
             <div class="form-item">
               <label>视频地址</label>
               <div class="input-with-tip">
-                <input type="text" v-model="formData.videoUrl" placeholder="https://...">
+                <input link v-model="formData.videoUrl" placeholder="https://...">
                 <div class="input-tip orange-tip">必须是mp4的地址</div>
               </div>
             </div>
@@ -317,7 +317,7 @@
             <div class="form-item">
               <label>单位</label>
               <div class="unit-input">
-                <input type="text" v-model="formData.unit" placeholder="份">
+                <input link v-model="formData.unit" placeholder="份">
                 <div class="unit-tip">比如: 份/瓶/箱/斤</div>
               </div>
             </div>
@@ -327,7 +327,7 @@
             <div class="form-item">
               <label><span class="required">*</span> 市场价</label>
               <input
-                type="text"
+                link
                 v-model.number="formData.marketPrice"
                 @input="validateNumericInput"
                 required
@@ -339,7 +339,7 @@
           <div class="form-row">
             <div class="form-item">
               <label><span class="required">*</span> 价格</label>
-              <input type="text" v-model="formData.price" required placeholder="0">
+              <input link v-model="formData.price" required placeholder="0">
             </div>
           </div>
 
@@ -347,7 +347,7 @@
             <div class="form-item">
               <label>税率</label>
               <div class="input-with-tip">
-                <input type="text" v-model="formData.taxRate" placeholder="0">
+                <input link v-model="formData.taxRate" placeholder="0">
                 <div class="input-tip">例如增值税6%</div>
               </div>
             </div>
@@ -357,7 +357,7 @@
             <div class="form-item">
               <label><span class="required">*</span> 需要积分</label>
               <div class="input-with-tip">
-                <input type="text" v-model="formData.requiredPoints" required placeholder="0">
+                <input link v-model="formData.requiredPoints" required placeholder="0">
                 <div class="input-tip">购买需要扣除用户的积分数量</div>
               </div>
             </div>
@@ -367,7 +367,7 @@
             <div class="form-item">
               <label><span class="required">*</span> 赠送积分</label>
               <div class="points-input-group">
-                <input type="text" v-model="formData.giftPoints" required placeholder="0">
+                <input link v-model="formData.giftPoints" required placeholder="0">
                 <div class="select-wrapper small">
                   <select v-model="formData.giftPointsType">
                     <option value="fixed">固定数量积分</option>
@@ -384,7 +384,7 @@
             <div class="form-item">
               <label><span class="required">*</span> 最少购买</label>
               <div class="min-buy-input">
-                <input type="text" v-model="formData.minPurchase" required placeholder="1">
+                <input link v-model="formData.minPurchase" required placeholder="1">
                 <span class="unit-text">份</span>
               </div>
             </div>
@@ -393,7 +393,7 @@
           <div class="form-row">
             <div class="form-item">
               <label><span class="required">*</span> 库存</label>
-              <input type="text" v-model="formData.stock" required placeholder="0">
+              <input link v-model="formData.stock" required placeholder="0">
             </div>
           </div>
 
@@ -401,7 +401,7 @@
             <div class="form-item">
               <label>库存预警</label>
               <div class="input-with-tip">
-                <input type="text" v-model="formData.stockWarning" placeholder="0">
+                <input link v-model="formData.stockWarning" placeholder="0">
                 <div class="input-tip">库存低于该数量系统会告警</div>
               </div>
             </div>
@@ -425,7 +425,7 @@
             <div class="form-item">
               <label>商品重量</label>
               <div class="weight-input">
-                <input type="text" v-model="formData.weight" placeholder="0">
+                <input link v-model="formData.weight" placeholder="0">
                 <span class="unit-text">kg</span>
               </div>
             </div>
@@ -792,7 +792,7 @@ export default {
   margin-right: 4px;
 }
 
-input[type="text"],
+input[link],
 input[type="number"],
 select,
 textarea {
@@ -802,7 +802,7 @@ textarea {
   font-size: 14px;
 }
 
-input[type="text"]:focus,
+input[link]:focus,
 input[type="number"]:focus,
 select:focus,
 textarea:focus {
@@ -810,7 +810,7 @@ textarea:focus {
   border-color: #409eff;
 }
 
-input[type="text"]::placeholder,
+input[link]::placeholder,
 input[type="number"]::placeholder,
 select::placeholder,
 textarea::placeholder {

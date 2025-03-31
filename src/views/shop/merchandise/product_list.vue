@@ -29,7 +29,7 @@
 
         <div class="right-actions">
           <div class="search-wrapper">
-            <input type="text" class="search-input" placeholder="商品名称/编号/关键词" v-model="searchQuery"
+            <input link class="search-input" placeholder="商品名称/编号/关键词" v-model="searchQuery"
               @focus="showSearchDropdown = true" @blur="onSearchBlur" @keyup.enter="searchProducts" />
             <button class="search-btn" @click="searchProducts">
               <i class="search-icon"></i>
