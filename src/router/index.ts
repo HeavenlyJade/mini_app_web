@@ -71,6 +71,12 @@ const routes: Array<RouteRecordRaw> = [
         name: 'specification_size',
         component: () => import('@/views/shop/merchandise/specification_size.vue'),
         meta: { title: '规格尺寸' }
+      },
+      {
+        path: '/orders/list',
+        name: 'order_list',
+        component: () => import('@/views/order/image_orders.vue'),
+        meta: { title: '订单列表' }
       }
       // 在这里添加其他需要使用侧边栏布局的路由
     ]
