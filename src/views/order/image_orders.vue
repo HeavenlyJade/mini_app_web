@@ -5,6 +5,17 @@
             <h2 class="page-title">图片订单管理</h2>
         </div>
 
+        <!-- 订单状态选项卡 -->
+        <div class="order-status-tabs">
+            <el-tabs v-model="activeStatus" @tab-click="handleStatusChange">
+                <el-tab-pane label="全部订单" name="all"></el-tab-pane>
+                <el-tab-pane label="待发货" name="待发货"></el-tab-pane>
+                <el-tab-pane label="已发货" name="已发货"></el-tab-pane>
+                <el-tab-pane label="已完成" name="已完成"></el-tab-pane>
+                <el-tab-pane label="已关闭" name="已关闭"></el-tab-pane>
+            </el-tabs>
+        </div>
+
         <!-- 搜索筛选区域 -->
         <div class="search-panel">
             <el-form :inline="true" :model="searchParams" class="search-form">
@@ -214,12 +225,22 @@ export default {
             currentPage: 1,
             pageSize: 10,
             jumpPage: '',
-            batchAction: ''
+            batchAction: '',
+
+            // 新增状态选项卡相关数据
+            activeStatus: 'all',
         }
     },
 
     computed: {
-        // 计算属性可以放这里
+        // 计算过滤后的订单列表 (如果需要本地过滤)
+        filteredOrders() {
+            if (this.activeStatus === 'all') {
+                return this.orderList;
+            } else {
+                return this.orderList.filter(order => order.status === this.activeStatus);
+            }
+        }
     },
 
     created() {
@@ -228,6 +249,13 @@ export default {
     },
 
     methods: {
+        // 切换状态选项卡
+        handleStatusChange(tab) {
+            this.activeStatus = tab.props.name;
+            this.currentPage = 1;
+            this.fetchOrders();
+        },
+
         // 获取订单列表
         async fetchOrders() {
             this.loading = true
@@ -238,7 +266,7 @@ export default {
                     need_total_count: true,
                     keyword: this.searchParams.keyword || undefined,
                     receiver_name: this.searchParams.receiver || undefined,
-                    status: this.searchParams.status !== 'all' ? this.searchParams.status : undefined,
+                    status: this.activeStatus !== 'all' ? this.activeStatus : undefined,
                     order_type: this.searchParams.orderType !== 'all' ? this.searchParams.orderType : undefined,
                     order_source: this.searchParams.orderSource !== 'all' ? this.searchParams.orderSource : undefined,
                     start_time: this.searchParams.dateRange?.[0],
@@ -335,9 +363,8 @@ export default {
 
         // 查看订单
         handleView(row) {
-            ElMessage.info(`查看订单: ${row.orderNumber}`)
             // 实际项目中可以跳转到订单详情页面
-            // this.$router.push(`/orders/detail/${row.id}`)
+            this.$router.push(`/orders/detail?order_id=${row.order_no}`)
         },
 
         // 删除订单
@@ -571,6 +598,28 @@ export default {
         display: flex;
         flex-direction: column;
         justify-content: center;
+    }
+}
+
+.order-status-tabs {
+    margin-bottom: 16px;
+    background-color: #fff;
+    border-radius: 4px;
+    padding: 0 16px;
+    
+    :deep(.el-tabs__nav) {
+        padding: 0 20px;
+    }
+    
+    :deep(.el-tabs__item) {
+        font-size: 14px;
+        height: 50px;
+        line-height: 50px;
+        
+        &.is-active {
+            font-weight: bold;
+            color: #409eff;
+        }
     }
 }
 </style>

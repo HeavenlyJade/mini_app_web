@@ -77,8 +77,27 @@ const routes: Array<RouteRecordRaw> = [
         name: 'order_list',
         component: () => import('@/views/order/image_orders.vue'),
         meta: { title: '订单列表' }
+      },
+      {
+        path: '/orders/detail',
+        name: 'order_detail',
+        component: () => import('@/views/order/order_detail.vue'),
+        meta: { title: '订单详情' }
       }
-      // 在这里添加其他需要使用侧边栏布局的路由
+      // 在这里添加其他需要使用侧边栏布局的路由 /orders/return-reasons
+      ,
+      {
+        path: '/orders/settings',
+        name: 'order_settings',
+        component: () => import('@/views/order/order_setting.vue'),
+        meta: { title: '订单配置' }
+      }  ,
+      {
+        path: '/orders/return-reasons',
+        name: 'return-reasons',
+        component: () => import('@/views/order/return_reason.vue'),
+        meta: { title: '订单退货原因' }
+      }
     ]
   }
 ]
