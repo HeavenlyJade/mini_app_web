@@ -51,7 +51,9 @@ const VueConfig = {
      * 如果你更懒一些，可以使用【宝塔面板进行部署】**/
     proxy: {
       '/api': {
+        /*target: 'http://8.137.108.237:8012',*/
         target: 'http://127.0.0.1:5555',
+
         // ws: true,
         changeOrigin: true
         // pathRewrite: {//路径重写

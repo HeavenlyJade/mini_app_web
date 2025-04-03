@@ -10,7 +10,7 @@ const http = axios.create({
 
 // 创建专用于图片上传的axios实例
 const imageUploadHttp = axios.create({
-  baseURL: 'http://8.137.108.237:8006', // 图片上传专用URL
+  baseURL: 'http://8.137.108.237:8012', // 图片上传专用URL
   timeout: 30000, // 上传可能需要更长的超时时间
 })
 

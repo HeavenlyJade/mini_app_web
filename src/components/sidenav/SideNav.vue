@@ -150,6 +150,32 @@ const menuItems = ref([
     ]
   },
   {
+    title: '分销管理',
+    icon: 'marketing-icon',
+    children: [
+      {
+        title: '分销列表',
+        icon: 'flash-icon',
+        path: '/distribution/user_list'
+      },
+      {
+        title: '分销等级',
+        icon: 'coupon-icon',
+        path: '/distribution/levels'
+      },
+      {
+        title: '分销配置',
+        icon: 'recommend-icon',
+        path: '/distribution/config'
+      },
+      {
+        title: '分销收入',
+        icon: 'popular-icon',
+        path: '/distribution/income'
+      }
+    ]
+  },
+  {
     title: '营销',
     icon: 'marketing-icon',
     children: [
@@ -207,13 +233,18 @@ const menuItems = ref([
       {
         title: '菜单列表',
         icon: 'menu-icon',
-        path: '/permissions/menus'
+        path: '/permissions/menus' 
       },
       {
         title: '资源列表',
         icon: 'resource-icon',
         path: '/permissions/resources'
-      }
+      },
+      {
+        title: '名片管理',
+        icon: 'resource-icon',
+        path: '/employee/namecards'
+      },
     ]
   }
 ])

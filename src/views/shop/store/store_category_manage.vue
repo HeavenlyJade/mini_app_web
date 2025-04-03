@@ -39,41 +39,12 @@
         default-expand-all
         :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
         @selection-change="handleSelectionChange"
-        v-loading="tableLoading">
+        v-loading="tableLoading"
+        style="width: 100%">
         <el-table-column type="selection" width="55"></el-table-column>
-        <el-table-column prop="name" label="编号" min-width="80">
-          <template #default="scope">
-            <div class="category-name-cell">
-              <span>{{ scope.row.id }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="type" label="类型" min-width="80">
-          <template #default="scope">
-            <div class="category-name-cell">
-              <span> {{ scope.row.name }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="type" label="类型" min-width="80">
-          <template #default="scope">
-            <div class="category-name-cell">
-              <span>{{ scope.row.type }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <!--        <el-table-column prop="icon" label="图标" width="120">-->
-        <!--          <template #default="scope">-->
-        <!--            <img v-if="scope.row.icon" :src="scope.row.icon" class="category-icon" alt="图标">-->
-        <!--            <span v-else>-</span>-->
-        <!--          </template>-->
-        <!--        </el-table-column>-->
-        <!--        <el-table-column prop="image" label="图片" width="120">-->
-        <!--          <template #default="scope">-->
-        <!--            <img v-if="scope.row.image" :src="scope.row.image" class="category-image" alt="图片">-->
-        <!--            <span v-else>-</span>-->
-        <!--          </template>-->
-        <!--        </el-table-column>-->
+        <el-table-column prop="id" label="编号" width="80"></el-table-column>
+        <el-table-column prop="name" label="类型" min-width="120" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="type" label="类型" width="120" show-overflow-tooltip></el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">
             <el-tag :type="scope.row.status === '正常' ? 'success' : 'info'">
@@ -500,6 +471,7 @@ export default {
 .page-container {
   padding: 20px;
   width: 100%;
+  box-sizing: border-box; /* 确保padding不会增加元素宽度 */
 }
 
 .page-header {
@@ -525,6 +497,8 @@ export default {
   background-color: #fff;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  overflow-x: auto; /* 添加水平滚动 */
+  max-width: 100%; /* 限制最大宽度 */
 }
 
 .category-name-cell {
@@ -569,5 +543,26 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* 确保表格内容不会溢出 */
+:deep(.el-table) {
+  table-layout: fixed; /* 使表格列宽固定 */
+  width: 100%;
+}
+
+:deep(.el-table__body) {
+  width: 100% !important;
+}
+
+:deep(.el-table__header) {
+  width: 100% !important;
+}
+
+/* 处理单元格内容溢出 */
+:deep(.el-table .cell) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
