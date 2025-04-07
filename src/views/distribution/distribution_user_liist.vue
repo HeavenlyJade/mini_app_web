@@ -140,18 +140,18 @@
         this.loading = true
         try {
           const response = await http.get('/api/v1/mini_core/distribution', {
-            params: {
+    
               page: this.currentPage,
               size: this.pageSize,
               keyword: this.searchForm.keyword || undefined,
               identity: this.searchForm.identity !== '' ? this.searchForm.identity : undefined,
               status: this.searchForm.status !== '' ? this.searchForm.status : undefined
-            }
+            
           })
   
           if (response.data && response.data.code === 200) {
-            this.tableData = response.data.data
-            this.total = response.data.total
+            this.tableData = Array.isArray(response.data.data) ? response.data.data : []
+            this.total = response.data.total || 0
           }
         } catch (error) {
           console.error('获取分销用户列表失败:', error)

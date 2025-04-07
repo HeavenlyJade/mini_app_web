@@ -220,6 +220,11 @@ const menuItems = ref([
     title: '权限',
     icon: 'permission-icon',
     children: [
+    {
+        title: '员工列表',
+        icon: 'user-icon',
+        path: '/permissions/staff'
+      },
       {
         title: '用户列表',
         icon: 'user-icon',

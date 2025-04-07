@@ -301,7 +301,7 @@
             company: this.searchForm.company || undefined
           }
           
-          const response = await http.get('/api/v1/mini_core/employees', { params })
+          const response = await http.get('/api/v1/mini_core/employees',  params )
           
           if (response.data && response.data.code === 200) {
             this.tableData = response.data.data
