@@ -17,43 +17,97 @@
         :disabled="isViewMode"
       >
         <!-- 基本信息 -->
-        <div class="form-section">
-          <div class="section-title">基本信息</div>
-
-          <div class="form-row">
-            <el-form-item label="门店名称" prop="name">
-              <el-input v-model="storeForm.name" placeholder="请输入门店名称"></el-input>
-            </el-form-item>
-
-            <el-form-item label="门店编号" prop="store_code">
-              <el-input v-model="storeForm.store_code" placeholder="请输入门店编号"></el-input>
-            </el-form-item>
+        <div class="form-section basic-info">
+          <div class="section-title">
+            <i class="el-icon-info"></i>
+            基本信息
           </div>
 
-          <div class="form-row">
-            <el-form-item label="省市区" prop="address">
-              <AddressSelector
-                mode="region-plus"
-                :default-codes="{ province_code: storeForm.province_code, }"
-                @change="handleAddressChange"
-              />
-            </el-form-item>
-
-
-            <el-form-item label="详细地址" prop="address">
-              <el-input v-model="storeForm.address" placeholder="请输入详细地址"></el-input>
-            </el-form-item>
-          </div>
-
-          <div class="form-row">
-            <el-form-item label="地理位置">
-              <div class="location-inputs">
-                <el-input v-model="storeForm.latitude" placeholder="纬度" class="location-input"></el-input>
-                <el-input v-model="storeForm.longitude" placeholder="经度" class="location-input"></el-input>
-                <el-button type="primary" size="small" @click="openMapDialog" v-if="!isViewMode">打开地图选择位置
-                </el-button>
+          <div class="form-content">
+            <!-- 第一行:门店名称、分类、编号 -->
+            <div class="form-row three-columns">
+              <div class="form-item">
+                <label><span class="required">*</span>门店名称</label>
+                <el-input 
+                  v-model="storeForm.name"
+                  placeholder="请输入门店名称"
+                  class="form-input"
+                />
               </div>
-            </el-form-item>
+
+              <div class="form-item">
+                <label>门店分类</label>
+                <el-select
+                  v-model="storeForm.category_id"
+                  placeholder="请选择门店分类"
+                  class="form-input"
+                >
+                  <el-option
+                    v-for="item in categoryOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
+              </div>
+
+              <div class="form-item">
+                <label>门店编号</label>
+                <el-input
+                  v-model="storeForm.store_code"
+                  placeholder="请输入门店编号"
+                  class="form-input"
+                />
+              </div>
+            </div>
+
+            <!-- 第二行:省市区和详细地址 -->
+            <div class="form-row two-columns">
+              <div class="form-item">
+                <label>省市区</label>
+                <AddressSelector
+                  mode="region-plus"
+                  :default-codes="{ province_code: storeForm.province_code }"
+                  @change="handleAddressChange"
+                  class="form-input"
+                />
+              </div>
+
+              <div class="form-item">
+                <label>详细地址</label>
+                <el-input
+                  v-model="storeForm.address"
+                  placeholder="请输入详细地址"
+                  class="form-input"
+                />
+              </div>
+            </div>
+
+            <!-- 第三行:地理位置 -->
+            <div class="form-row">
+              <div class="form-item location-item">
+                <label>地理位置</label>
+                <div class="location-inputs">
+                  <el-input
+                    v-model="storeForm.latitude"
+                    placeholder="纬度"
+                    class="location-input"
+                  />
+                  <el-input
+                    v-model="storeForm.longitude"
+                    placeholder="经度"
+                    class="location-input"
+                  />
+                  <el-button 
+                    type="primary"
+                    @click="openMapDialog"
+                    class="map-button"
+                  >
+                    打开地图选择位置
+                  </el-button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -117,43 +171,29 @@
           <div class="section-title">门店图片</div>
 
           <div class="form-row">
-            <el-form-item label="门店Logo">
-              <div class="upload-container">
-                <el-upload
-                  action="#"
-                  list-type="picture-card"
-                  :auto-upload="false"
-                  :limit="1"
-                  :file-list="logoFileList"
-                  :on-change="handleLogoChange"
-                  :on-remove="handleLogoRemove"
-                  :disabled="isViewMode"
-                >
-                  <i class="el-icon-plus" v-if="!isViewMode"></i>
-                </el-upload>
-                <div class="upload-tip" v-if="!isViewMode">建议上传正方形图片，大小不超过2MB</div>
-              </div>
-            </el-form-item>
+            <div class="form-item">
+              <label>门店Logo</label>
+              <file-uploader
+                v-model:value="logoList"
+                :limit="1"
+                :show-tips="true"
+                tip-text="建议上传正方形图片，大小不超过2MB"
+                @change="handleLogoChange"
+              />
+            </div>
           </div>
 
           <div class="form-row">
-            <el-form-item label="门店图片">
-              <div class="upload-container">
-                <el-upload
-                  action="#"
-                  list-type="picture-card"
-                  :auto-upload="false"
-                  :limit="5"
-                  :file-list="imageFileList"
-                  :on-change="handleImageChange"
-                  :on-remove="handleImageRemove"
-                  :disabled="isViewMode"
-                >
-                  <i class="el-icon-plus" v-if="!isViewMode"></i>
-                </el-upload>
-                <div class="upload-tip" v-if="!isViewMode">最多上传5张图片，每张大小不超过2MB</div>
-              </div>
-            </el-form-item>
+            <div class="form-item">
+              <label>门店图片</label>
+              <file-uploader
+                v-model:value="imageList"
+                :limit="5"
+                :show-tips="true"
+                tip-text="第一张图片默认为封面图片，可拖动排序"
+                @change="handleImageChange"
+              />
+            </div>
           </div>
         </div>
 
@@ -247,10 +287,12 @@
 <script>
 import http from '@/utils/http'
 import AddressSelector from '@/components/address/AddressSelector.vue'
+import FileUploader from '@/components/public/FileUploader.vue'
+import { loadStoreCategories } from '@/utils/store'
 
 export default {
   name: 'StoreManagement',
-  components: { AddressSelector },
+  components: { AddressSelector,FileUploader },
   data () {
     return {
       // 页面模式标识
@@ -277,24 +319,25 @@ export default {
         qq: '',
         service_fee_rate: 0,
         gst_tax_rate: 0,
-        print_config: '',
-        wechat_config: '',
-        business_scope: '',
-        description: '',
-        features: '',
+        print_config: null,
+        wechat_config: null,
+        business_scope: null,
+        description: null,
+        features: null,
         latitude: null,
         longitude: null,
         sort_order: 0,
         status: '正常',
-        store_logo: '',
-        store_image: '',
-        opening_hours: '',
+        store_logo: null,
+        store_image: null,
+        opening_hours: null,
         delivery_price: 0,
         min_order_amount: 0,
-        door_info: '',
-        wifi_name: '',
-        wifi_password: '',
-        customer_notice: ''
+        door_info: null,
+        wifi_name: null,
+        wifi_password: null,
+        customer_notice: null,
+        category_id: null
       },
 
       // 表单验证规则
@@ -347,11 +390,11 @@ export default {
       },
 
       // 门店分类选项
-      storeCategoryOptions: [],
+      categoryOptions: [],
 
       // 文件列表
-      logoFileList: [],
-      imageFileList: [],
+      logoList: [],
+      imageList: [],
 
       // 页面状态
       loading: false,
@@ -369,7 +412,7 @@ export default {
     this.storeId = this.$route.query.id
     this.isEdit = !!this.storeId
     this.isViewMode = this.$route.query.mode === 'view' // 从路由参数获取查看模式参数
-
+    this.loadBaseData()
     // 初始化数据
     this.fetchStoreCategories()
 
@@ -382,6 +425,12 @@ export default {
     }
   },
   methods: {
+
+    async loadBaseData() {
+    
+        this.categoryOptions = await loadStoreCategories()
+     
+    },
     // 获取门店详情
     handleAddressChange ({
       province,
@@ -403,28 +452,19 @@ export default {
           // 填充表单数据
           this.storeForm = response.data.data
 
-          // 处理图片数据
+          // 处理Logo图片
           if (this.storeForm.store_logo) {
-            this.logoFileList = [{
-              name: 'logo',
-              url: this.storeForm.store_logo
-            }]
+            this.logoList = [this.storeForm.store_logo]
           }
 
+          // 处理门店图片
           if (this.storeForm.store_image) {
-            // 如果是JSON字符串，则解析
             try {
               const images = JSON.parse(this.storeForm.store_image)
-              this.imageFileList = images.map((url, index) => ({
-                name: `image_${index}`,
-                url
-              }))
+              this.imageList = Array.isArray(images) ? images : [images]
             } catch (e) {
-              // 如果不是JSON字符串，则作为单个图片处理
-              this.imageFileList = [{
-                name: 'image',
-                url: this.storeForm.store_image
-              }]
+              // 如果解析失败,当作单个图片处理
+              this.imageList = this.storeForm.store_image ? [this.storeForm.store_image] : []
             }
           }
         } else {
@@ -444,7 +484,10 @@ export default {
         const response = await http.get('/api/v1/mini_core/shop-store-category')
 
         if (response.data && response.data.data) {
-          this.storeCategoryOptions = response.data.data
+          this.categoryOptions = response.data.data.map(item => ({
+            value: item.id.toString(),
+            label: item.name
+          }))
         }
       } catch (error) {
         console.error('获取门店分类错误:', error)
@@ -458,35 +501,6 @@ export default {
         if (!valid) {
           this.$message.warning('请填写必填字段')
           return
-        }
-
-        // 处理图片数据
-        if (this.logoFileList.length > 0) {
-          // 如果有新上传的文件需要先上传
-          if (this.logoFileList[0].raw) {
-            const logoUrl = await this.uploadFile(this.logoFileList[0].raw)
-            this.storeForm.store_logo = logoUrl
-          } else {
-            this.storeForm.store_logo = this.logoFileList[0].url
-          }
-        } else {
-          this.storeForm.store_logo = ''
-        }
-
-        // 处理门店图片
-        if (this.imageFileList.length > 0) {
-          const imageUrls = []
-          for (const item of this.imageFileList) {
-            if (item.raw) {
-              const imageUrl = await this.uploadFile(item.raw)
-              imageUrls.push(imageUrl)
-            } else {
-              imageUrls.push(item.url)
-            }
-          }
-          this.storeForm.store_image = JSON.stringify(imageUrls)
-        } else {
-          this.storeForm.store_image = ''
         }
 
         this.loading = true
@@ -516,44 +530,6 @@ export default {
       })
     },
 
-    // 上传文件
-    async uploadFile (file) {
-      const formData = new FormData()
-      formData.append('file', file)
-
-      try {
-        const response = await http.uploadImage(formData)
-        if (response.data && response.data.url) {
-          return response.data.url
-        } else {
-          this.$message.error('上传图片失败')
-          return ''
-        }
-      } catch (error) {
-        console.error('上传图片错误:', error)
-        this.$message.error('上传图片失败: ' + (error.message || '网络错误'))
-        return ''
-      }
-    },
-
-    // Logo上传相关方法
-    handleLogoChange (file, fileList) {
-      this.logoFileList = fileList.slice(-1) // 只保留最后一个文件
-    },
-
-    handleLogoRemove () {
-      this.logoFileList = []
-    },
-
-    // 图片上传相关方法
-    handleImageChange (file, fileList) {
-      this.imageFileList = fileList.slice(0, 5) // 最多5张图片
-    },
-
-    handleImageRemove (file, fileList) {
-      this.imageFileList = fileList
-    },
-
     // 打开地图选择对话框
     openMapDialog () {
       window.open('https://lbs.qq.com/getPoint/', '_blank')
@@ -569,6 +545,38 @@ export default {
     // 取消
     cancel () {
       this.$router.push('/shop/store/list')
+    },
+
+    // 处理Logo图片变化
+    handleLogoChange(urls) {
+      if (urls && urls.length > 0) {
+        this.storeForm.store_logo = urls[0]
+      } else {
+        this.storeForm.store_logo = ''
+      }
+    },
+
+    // 处理门店图片变化
+    handleImageChange(urls) {
+      this.storeForm.store_image = JSON.stringify(urls)
+    },
+
+    // 重置表单时清空图片
+    resetForm() {
+      if (this.$refs.storeFormRef) {
+        this.$refs.storeFormRef.resetFields()
+      }
+      
+      this.storeForm = {
+        // ... 其他字段重置
+        category_id: '',
+        store_logo: '',
+        store_image: ''
+      }
+      
+      // 清空图片列表
+      this.logoList = []
+      this.imageList = []
     }
   }
 }
@@ -625,16 +633,17 @@ export default {
 }
 
 .form-row .el-form-item {
-  flex: 1;
-  min-width: 300px;
   margin-right: 20px;
+  flex: 1;
 }
 
 .form-row.full-width .el-form-item {
-  width: 100%;
-  flex: auto;
-}
+  flex-direction: column;
 
+}
+.el-cascader {
+  width: 100%;
+}
 .form-tip {
   font-size: 12px;
   color: #909399;
@@ -732,6 +741,120 @@ export default {
 
   .map-coordinates {
     flex-direction: column;
+  }
+}
+
+.basic-info {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+}
+
+.section-title {
+  padding: 16px 20px;
+  border-bottom: 1px solid #ebeef5;
+  font-size: 16px;
+  font-weight: 500;
+  color: #303133;
+  display: flex;
+  align-items: center;
+}
+
+.section-title i {
+  margin-right: 8px;
+  color: #409EFF;
+}
+
+.form-content {
+  padding: 20px;
+}
+
+.form-row {
+  margin-bottom: 24px;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.three-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.two-columns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.form-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-item label {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #606266;
+  line-height: 1.5;
+}
+
+.required {
+  color: #F56C6C;
+  margin-right: 4px;
+}
+
+.form-input {
+  width: 100%;
+}
+
+.location-item {
+  width: 100%;
+}
+
+.location-inputs {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.location-input {
+  width: 180px;
+}
+
+.map-button {
+  height: 40px;
+  padding: 0 20px;
+  font-size: 14px;
+}
+
+/* 响应式布局 */
+@media (max-width: 1200px) {
+  .three-columns {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .three-columns,
+  .two-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .location-inputs {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .location-input {
+    width: 100%;
+  }
+
+  .map-button {
+    width: 100%;
   }
 }
 </style>

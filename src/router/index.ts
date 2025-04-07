@@ -137,6 +137,24 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: '分销收入记录' }
       },
       {
+        path: '/permissions/staff',
+        name: 'user_staff',
+        component: () => import('@/views/permissions/staff.vue'),
+        meta: { title: '员工管理' }
+      },
+      {
+        path: '/permissions/users',
+        name: 'shop_user_management',
+        component: () => import('@/views/permissions/shop_user_management.vue'),
+        meta: { title: '商城用户管理' }
+      },
+      {
+        path: '/permissions/users_address',
+        name: 'shop_user_address',
+        component: () => import('@/views/permissions/shop_user_address.vue'),
+        meta: { title: '商城用户地址管理' }
+      },
+      {
         path: '/employee/namecards',
         name: 'employee_namecards',
         component: () => import('@/views/employee/employee_namecard_manage.vue'),

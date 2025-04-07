@@ -175,47 +175,47 @@ const menuItems = ref([
       }
     ]
   },
-  {
-    title: '营销',
-    icon: 'marketing-icon',
-    children: [
-      {
-        title: '秒杀活动列表',
-        icon: 'flash-icon',
-        path: '/marketing/flash-sale'
-      },
-      {
-        title: '优惠券列表',
-        icon: 'coupon-icon',
-        path: '/marketing/coupons'
-      },
-      {
-        title: '品牌推荐',
-        icon: 'recommend-icon',
-        path: '/marketing/brand-recommend'
-      },
-      {
-        title: '新品推荐',
-        icon: 'new-icon',
-        path: '/marketing/new-product'
-      },
-      {
-        title: '人气推荐',
-        icon: 'popular-icon',
-        path: '/marketing/popular'
-      },
-      {
-        title: '专题推荐',
-        icon: 'special-icon',
-        path: '/marketing/special'
-      },
-      {
-        title: '广告列表',
-        icon: 'ad-icon',
-        path: '/marketing/ads'
-      }
-    ]
-  },
+  // {
+  //   title: '营销',
+  //   icon: 'marketing-icon',
+  //   children: [
+  //     {
+  //       title: '秒杀活动列表',
+  //       icon: 'flash-icon',
+  //       path: '/marketing/flash-sale'
+  //     },
+  //     {
+  //       title: '优惠券列表',
+  //       icon: 'coupon-icon',
+  //       path: '/marketing/coupons'
+  //     },
+  //     {
+  //       title: '品牌推荐',
+  //       icon: 'recommend-icon',
+  //       path: '/marketing/brand-recommend'
+  //     },
+  //     {
+  //       title: '新品推荐',
+  //       icon: 'new-icon',
+  //       path: '/marketing/new-product'
+  //     },
+  //     {
+  //       title: '人气推荐',
+  //       icon: 'popular-icon',
+  //       path: '/marketing/popular'
+  //     },
+  //     {
+  //       title: '专题推荐',
+  //       icon: 'special-icon',
+  //       path: '/marketing/special'
+  //     },
+  //     {
+  //       title: '广告列表',
+  //       icon: 'ad-icon',
+  //       path: '/marketing/ads'
+  //     }
+  //   ]
+  // },
   {
     title: '权限',
     icon: 'permission-icon',
@@ -231,20 +231,25 @@ const menuItems = ref([
         path: '/permissions/users'
       },
       {
+        title: '用户地址',
+        icon: 'user-icon',
+        path: '/permissions/users_address'
+      },
+      {
         title: '角色列表',
         icon: 'role-icon',
         path: '/permissions/roles'
       },
-      {
-        title: '菜单列表',
-        icon: 'menu-icon',
-        path: '/permissions/menus' 
-      },
-      {
-        title: '资源列表',
-        icon: 'resource-icon',
-        path: '/permissions/resources'
-      },
+      // {
+      //   title: '菜单列表',
+      //   icon: 'menu-icon',
+      //   path: '/permissions/menus' 
+      // },
+      // {
+      //   title: '资源列表',
+      //   icon: 'resource-icon',
+      //   path: '/permissions/resources'
+      // },
       {
         title: '名片管理',
         icon: 'resource-icon',

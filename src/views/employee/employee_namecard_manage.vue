@@ -105,17 +105,14 @@
           label-width="80px"
         >
           <el-form-item label="头像" prop="image_url">
-            <el-upload
-              class="avatar-uploader"
-              :action="uploadUrl"
-              :headers="uploadHeaders"
-              :show-file-list="false"
-              :on-success="handleAvatarSuccess"
-              :before-upload="beforeAvatarUpload"
-            >
-              <img v-if="employeeForm.image_url" :src="employeeForm.image_url" class="avatar" />
-              <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-            </el-upload>
+            <!-- 使用FileUploader组件替换原来的上传组件 -->
+            <file-uploader
+              v-model:value="avatarList"
+              :limit="1"
+              :show-tips="false"
+              tip-text="请上传员工头像"
+              @change="handleAvatarChange"
+            />
           </el-form-item>
           
           <el-form-item label="姓名" prop="name">
@@ -215,12 +212,14 @@
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { Plus, Refresh } from '@element-plus/icons-vue'
   import http from '@/utils/http'
+  import FileUploader from '@/components/public/FileUploader.vue'
   
   export default {
     name: 'EmployeeNamecardManage',
     components: {
       Plus,
-      Refresh
+      Refresh,
+      FileUploader
     },
     data() {
       return {
@@ -245,14 +244,18 @@
         submitLoading: false,
         employeeForm: {
           id: null,
-          name: '',
-          phone: '',
-          weixing: '',
-          position: '',
-          company: '',
-          image_url: '',
-          openid: ''
+          name: null,
+          phone: null,
+          weixing: null,
+          position: null,
+          company: null,
+          image_url: null,
+          openid: null,
+          image_url:null
         },
+        
+        // 头像上传
+        avatarList: [],
         
         // 表单验证规则
         rules: {
@@ -272,11 +275,6 @@
           ]
         },
         
-        // 上传配置
-        uploadUrl: '/api/v1/mini_core/upload',
-        uploadHeaders: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
         defaultAvatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
         
         // 预览抽屉
@@ -298,10 +296,11 @@
             size: this.pageSize,
             keyword: this.searchForm.keyword || undefined,
             position: this.searchForm.position || undefined,
-            company: this.searchForm.company || undefined
+            company: this.searchForm.company || undefined,
+            need_total_count: true
           }
           
-          const response = await http.get('/api/v1/mini_core/employees',  params )
+          const response = await http.get('/api/v1/mini_core/card_list', params)
           
           if (response.data && response.data.code === 200) {
             this.tableData = response.data.data
@@ -351,6 +350,10 @@
         this.isEdit = true
         this.dialogTitle = '编辑员工'
         this.employeeForm = JSON.parse(JSON.stringify(row))
+        
+        // 设置头像列表
+        this.avatarList = this.employeeForm.image_url ? [this.employeeForm.image_url] : []
+        
         this.dialogVisible = true
       },
       
@@ -393,6 +396,15 @@
         })
       },
       
+      // 处理头像变化
+      handleAvatarChange(urls) {
+        if (urls && urls.length > 0) {
+          this.employeeForm.image_url = urls[0]
+        } else {
+          this.employeeForm.image_url = ''
+        }
+      },
+      
       // 重置表单
       resetForm() {
         if (this.$refs.employeeForm) {
@@ -409,6 +421,9 @@
           image_url: '',
           openid: ''
         }
+        
+        // 清空头像列表
+        this.avatarList = []
       },
       
       // 提交表单
@@ -426,10 +441,10 @@
           
           if (this.isEdit) {
             // 编辑
-            response = await http.put(`/api/v1/mini_core/employees/${formData.id}`, formData)
+            response = await http.put(`/api/v1/mini_core/card`, formData)
           } else {
             // 新增
-            response = await http.post('/api/v1/mini_core/employees', formData)
+            response = await http.post('/api/v1/mini_core/card', formData)
           }
           
           if (response.data && response.data.code === 200) {
@@ -445,31 +460,6 @@
         } finally {
           this.submitLoading = false
         }
-      },
-      
-      // 头像上传成功
-      handleAvatarSuccess(response, file) {
-        if (response.code === 200 && response.data) {
-          this.employeeForm.image_url = response.data
-        } else {
-          ElMessage.error('上传失败')
-        }
-      },
-      
-      // 头像上传前验证
-      beforeAvatarUpload(file) {
-        const isImage = file.type.startsWith('image/')
-        const isLt2M = file.size / 1024 / 1024 < 2
-        
-        if (!isImage) {
-          ElMessage.error('上传头像图片只能是图片格式!')
-        }
-        
-        if (!isLt2M) {
-          ElMessage.error('上传头像图片大小不能超过 2MB!')
-        }
-        
-        return isImage && isLt2M
       },
       
       // 头像加载失败
@@ -534,40 +524,6 @@
     padding: 16px;
     display: flex;
     justify-content: flex-end;
-  }
-  
-  /* 头像上传样式 */
-  .avatar-uploader {
-    width: 100px;
-    height: 100px;
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .avatar-uploader:hover {
-    border-color: #409EFF;
-  }
-  
-  .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 100px;
-    height: 100px;
-    line-height: 100px;
-    text-align: center;
-  }
-  
-  .avatar {
-    width: 100px;
-    height: 100px;
-    display: block;
-    object-fit: cover;
   }
   
   /* 名片预览样式 */

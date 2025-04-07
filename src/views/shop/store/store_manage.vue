@@ -12,8 +12,7 @@
           <div class="form-row">
             <div class="form-item">
               <label>门店分类</label>
-              <select v-model="searchForm.category" class="form-select">
-                <option value="">全部</option>
+              <select v-model="searchForm.category_id" class="form-select">
                 <option v-for="item in categoryOptions" :key="item.value" :value="item.value">
                   {{ item.label }}
                 </option>
@@ -98,7 +97,6 @@
             <th width="100">门店编号</th>
             <th width="180">门店名称</th>
             <th width="120">门店分类</th>
-            <th width="120">门店类型</th>
             <th width="200">地址</th>
             <th width="120">联系电话</th>
             <th width="100">状态</th>
@@ -128,8 +126,8 @@
                 <span>{{ item.name }}</span>
               </div>
             </td>
-            <td>{{ getCategoryName(item.store_category) }}</td>
-            <td>{{ getTypeName(item.item) }}</td>
+            <td>{{ item.category.name }}</td>
+     
             <td class="address-cell">{{ item.address }}</td>
             <td>{{ item.contact_phone }}</td>
             <td>
@@ -200,6 +198,7 @@
 
 <script>
 import http from '@/utils/http'
+import { loadStoreCategories } from '@/utils/store'
 
 export default {
   name: 'StoreManagementList',
@@ -207,14 +206,14 @@ export default {
     return {
       // 搜索表单
       searchForm: {
-        category: '',
-        storeId: '',
-        status: '',
-        type: '',
-        name: '',
-        address: '',
-        startDate: '',
-        endDate: ''
+        category_id: null,
+        storeId: null,
+        status: null,
+        type: null,
+        name: null,
+        address: null,
+        startDate: null,
+        endDate: null
       },
 
       // 列表数据
@@ -232,42 +231,8 @@ export default {
       selectedItems: [],
 
       // 选项数据
-      categoryOptions: [
-        {
-          value: '1',
-          label: '旗舰店'
-        },
-        {
-          value: '2',
-          label: '直营店'
-        },
-        {
-          value: '3',
-          label: '加盟店'
-        },
-        {
-          value: '4',
-          label: '体验店'
-        }
-      ],
-      typeOptions: [
-        {
-          value: 'retail',
-          label: '零售门店'
-        },
-        {
-          value: 'service',
-          label: '服务门店'
-        },
-        {
-          value: 'mixed',
-          label: '综合门店'
-        },
-        {
-          value: 'online',
-          label: '线上店铺'
-        }
-      ]
+      categoryOptions: [],
+      typeOptions: []
     }
   },
   computed: {
@@ -317,6 +282,11 @@ export default {
     this.loadBaseData()
   },
   methods: {
+
+    async loadBaseData() {
+      this.categoryOptions = await loadStoreCategories()
+
+  },
     // 获取数据
     async fetchData () {
       this.tableLoading = true
@@ -345,15 +315,15 @@ export default {
 
     // 重置搜索
     resetSearch () {
-      this.searchForm = {
-        category: '',
-        storeId: '',
-        status: '',
-        type: '',
-        name: '',
-        address: '',
-        startDate: '',
-        endDate: ''
+      this.searchForm= {
+        category_id: null,
+        storeId: null,
+        status: null,
+        type: null,
+        name: null,
+        address: null,
+        startDate: null,
+        endDate: null
       }
     },
 
@@ -498,25 +468,6 @@ export default {
       return typeObj ? typeObj.label : '未知类型'
     },
 
-    // 加载基础数据（分类、类型等选项）
-    loadBaseData () {
-      // 加载门店分类
-      // axios.get('/api/v1/mini_core/shop-store-category')
-      //   .then(response => {
-      //     if (response.data && response.data.data) {
-      //       this.categoryOptions = response.data.data.map(item => ({
-      //         value: item.id.toString(),
-      //         label: item.name
-      //       }))
-      //     }
-      //   })
-      //   .catch(error => {
-      //     console.error('获取门店分类失败:', error)
-      //   })
-
-      // 注意：类型等其他基础数据也可以从后端加载
-      // 本示例中使用了硬编码的选项数据
-    },
 
     // 格式化日期时间
     formatDateTime (timestamp) {
