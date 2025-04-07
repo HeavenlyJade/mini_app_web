@@ -35,16 +35,6 @@
               <i class="search-icon"></i>
             </button>
 
-            <!-- 搜索下拉面板 -->
-            <div class="search-dropdown" v-if="showSearchDropdown">
-              <div class="search-stat-item">浏览量：{{ stats.views }}</div>
-              <div class="search-stat-item">收藏量：{{ stats.favorites }}</div>
-              <div class="search-stat-item">订单数：{{ stats.orders }}</div>
-              <div class="search-stat-item">销售数：{{ stats.sales }}</div>
-              <div class="search-stat-item">满意度：{{ stats.satisfaction }}</div>
-              <div class="search-stat-item">赞：{{ stats.likes }}</div>
-              <div class="search-stat-item">踩：{{ stats.dislikes }}</div>
-            </div>
           </div>
         </div>
       </div>
@@ -74,7 +64,7 @@
               <th class="name-col">名称</th>
               <th class="category-col">商品分类</th>
               <th class="shop-col">所属门店</th>
-              <th class="store-col">门店/分类</th>
+              <!-- <th class="store-col">门店/分类</th> -->
               <th class="stock-col">库存/状态</th>
               <th class="price-col">价格</th>
               <th class="actions-col">操作</th>
@@ -109,8 +99,8 @@
                 </div>
               </td>
               <td class="category-col">{{ getCategoryName(product.category_id) }}</td>
-              <td class="shop-col">{{ product.shop || '-' }}</td>
-              <td class="store-col">{{ product.store_category || '-' }}</td>
+              <td class="shop-col">{{ getStoreName(product.store_id) }}</td>
+              <!-- <td class="store-col">{{ product.store_category || '-' }}</td> -->
               <td class="stock-col">
                 {{ product.stock || 0 }}
                 <div class="status-badge" :class="getStatusClass(product.status)">
@@ -179,6 +169,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import http from '@/utils/http'
+import { loadStoreCategories } from '@/utils/store'
 
 export default {
   name: 'ProductList',
@@ -239,6 +230,7 @@ export default {
     // 选择商品
     const selectAll = ref(false)
     const selectedProducts = ref([])
+    const categoryOptions = ref([])
 
     // 分页
     const totalProducts = ref(0)
@@ -291,7 +283,14 @@ export default {
         console.error('获取分类列表错误:', err)
       }
     }
-
+    const loadBaseData = async () => {
+      categoryOptions.value = await loadStoreCategories()
+    }
+    const getStoreName = (storeId) => {
+      if (!storeId) return '-'
+      const store = categoryOptions.value.find(store => store.value === String(storeId))
+      return store ? store.label : '-'
+    }
     // 获取分类名称
     const getCategoryName = (categoryId) => {
       if (!categoryId) return '-'
@@ -537,6 +536,7 @@ export default {
     onMounted(() => {
       fetchProducts()
       fetchCategories()
+      loadBaseData()
     })
 
     return {
@@ -576,7 +576,9 @@ export default {
       getCategoryName,
       getFirstImage,
       getStatusClass,
-      getStatusText
+      getStatusText,
+      loadBaseData,
+      getStoreName
     }
   }
 }
