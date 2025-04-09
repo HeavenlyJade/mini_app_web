@@ -10,7 +10,7 @@
         <button class="toggle-nav-btn" @click="toggleNav">
           <i :class="['toggle-icon', isNavCollapsed ? 'expand-icon' : 'collapse-icon']"></i>
         </button>
-        <h1 class="page-title">{{ pageTitle }}</h1>
+        <!-- <h1 class="page-title">{{ pageTitle }}</h1> -->
         <div class="user-dropdown">
           <button class="user-btn" @click="toggleUserMenu">
             {{ userName }}

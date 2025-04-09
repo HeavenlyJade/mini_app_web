@@ -2,7 +2,7 @@
   <div class="page-container">
     <!-- 页面头部 -->
     <div class="page-header">
-      <h2 class="page-title">{{ isEdit ? '编辑门店分类' : '添加门店分类' }}</h2>
+      <h2 class="page-title">{{ isEdit ? '编辑商品分类' : '添加商品分类' }}</h2>
     </div>
 
     <!-- 分类添加表单 -->
@@ -26,19 +26,27 @@
           </div>
         </div>
 
-        <div class="form-item">
+        <!-- <div class="form-item">
           <label>所属门店</label>
           <input link v-model="categoryForm.store_id" class="form-input" placeholder="所属门店">
-        </div>
+        </div> -->
 
         <div class="form-item">
           <label>上级分类</label>
-          <select v-model="categoryForm.parent_id" class="form-select">
-            <option value="">请选择</option>
-            <option v-for="category in parentCategories" :key="category.id" :value="category.id">
-              {{ category.name }}
-            </option>
-          </select>
+          <div class="select-wrapper">
+            <select v-model="categoryForm.parent_id" class="form-select">
+              <option value="">请选择</option>
+              <option 
+                v-for="category in parentCategories" 
+                :key="category.id" 
+                :value="category.id"
+                :class="{ 'level-0': category.level === 0, 'level-1': category.level === 1, 'level-2': category.level === 2 }">
+                <template v-if="category.level === 0">{{ category.name }}</template>
+                <template v-if="category.level === 1">{{ category.name }}</template>
+                <template v-if="category.level === 2">{{ category.name }}</template>
+              </option>
+            </select>
+          </div>
         </div>
 
         <div class="form-item">
@@ -51,35 +59,27 @@
 
         <div class="form-item">
           <label>图标</label>
-          <div class="upload-container">
-            <el-upload
-              action="#"
-              :http-request="uploadIcon"
-              :show-file-list="false"
-              :before-upload="beforeIconUpload">
-              <el-button type="warning" :icon="Upload">上传图标</el-button>
-            </el-upload>
-            <div v-if="categoryForm.icon" class="preview-container">
-              <img :src="categoryForm.icon" class="preview-image" alt="图标预览">
-              <el-button type="danger" :icon="Delete" size="small" @click="removeIcon" class="remove-btn">删除</el-button>
-            </div>
+          <div class="upload-wrapper">
+            <file-uploader
+              v-model:value="categoryForm.iconList"
+              @change="handleIconChange"
+              :limit="1"
+              tip-text="请上传分类图标"
+              :disabled="false">
+            </file-uploader>
           </div>
         </div>
 
         <div class="form-item">
           <label>图片</label>
-          <div class="upload-container">
-            <el-upload
-              action="#"
-              :http-request="uploadImage"
-              :show-file-list="false"
-              :before-upload="beforeImageUpload">
-              <el-button type="warning" :icon="Upload">上传图片</el-button>
-            </el-upload>
-            <div v-if="categoryForm.image" class="preview-container">
-              <img :src="categoryForm.image" class="preview-image" alt="图片预览">
-              <el-button type="danger" :icon="Delete" size="small" @click="removeImage" class="remove-btn">删除</el-button>
-            </div>
+          <div class="upload-wrapper">
+            <file-uploader
+              v-model:value="categoryForm.imageList"
+              @change="handleImageChange"
+              :limit="1"
+              tip-text="请上传分类图片"
+              :disabled="false">
+            </file-uploader>
           </div>
         </div>
 
@@ -147,6 +147,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElLoading } from 'element-plus'
 import { Upload, Delete } from '@element-plus/icons-vue'
 import RichTextEditor from '@/components/richtext/RichTextEditor.vue'
+import FileUploader from '@/components/public/FileUploader.vue'
 import http from '@/utils/http'
 
 // 路由和导航
@@ -163,32 +164,86 @@ const newProperty = reactive({ key: '', value: '' })
 
 // 表单数据
 const categoryForm = reactive({
-  id: '',
-  name: '',
-  remark: '',
-  type: '',
+  id: null,
+  name: null,
+  remark: null,
+  type: null,
   store_id: null,
-  parent_id: '',
-  code: '',
-  icon: '',
-  image: '',
+  parent_id: null,
+  code: null,
+  icon: null,
+  image: null,
+  iconList: [],
+  imageList: [],
   sort_order: 0,
   status: '正常',
-  content: ''
+  content: null
 })
 
-// 获取父级分类列表
+// 图标上传处理
+const handleIconChange = (urls) => {
+  if (urls && urls.length > 0) {
+    categoryForm.icon = urls[0]
+  } else {
+    categoryForm.icon = ''
+  }
+}
+
+// 图片上传处理
+const handleImageChange = (urls) => {
+  if (urls && urls.length > 0) {
+    categoryForm.image = urls[0]
+  } else {
+    categoryForm.image = ''
+  }
+}
+
+// 获取父级分类列表并转换为树状结构显示
 const fetchParentCategories = async () => {
   try {
     loading.value = true
-    const response = await http.get('/api/v1/mini_core/product-category')
+    const response = await http.post('/api/v1/mini_core/product-category-field',{fields:['id','name','parent_id']})
     if (response.data) {
-      // 处理数据格式
+      let categories = []
       if (Array.isArray(response.data)) {
-        parentCategories.value = response.data.filter(item => item.parent_id === 0)
+        categories = response.data
       } else if (response.data.data && Array.isArray(response.data.data)) {
-        parentCategories.value = response.data.data.filter(item => item.parent_id === 0)
+        categories = response.data.data
       }
+      
+      // 先获取顶级分类
+      const topLevelCategories = categories.filter(cat => cat.parent_id === 0)
+      
+      // 转换为树状结构的扁平数组
+      const result = []
+      
+      // 添加顶级分类
+      topLevelCategories.forEach(cat => {
+        result.push({
+          ...cat,
+          level: 0
+        })
+        
+        // 添加子分类（第一级）
+        const children = categories.filter(child => child.parent_id === cat.id)
+        children.forEach(child => {
+          result.push({
+            ...child,
+            level: 1
+          })
+          
+          // 添加孙子分类（第二级）
+          const grandchildren = categories.filter(gc => gc.parent_id === child.id)
+          grandchildren.forEach(gc => {
+            result.push({
+              ...gc,
+              level: 2
+            })
+          })
+        })
+      })
+      
+      parentCategories.value = result
     }
   } catch (error) {
     console.error('获取父级分类失败:', error)
@@ -210,15 +265,24 @@ const fetchCategoryDetail = async () => {
 
       // 更新表单数据
       Object.keys(categoryForm).forEach(key => {
-        if (categoryData[key] !== undefined) {
+        if (categoryData[key] !== undefined && key !== 'iconList' && key !== 'imageList') {
           categoryForm[key] = categoryData[key]
         }
       })
 
+      // 初始化图标和图片数据
+      if (categoryData.icon) {
+        categoryForm.iconList = [categoryData.icon]
+      }
+      
+      if (categoryData.image) {
+        categoryForm.imageList = [categoryData.image]
+      }
+
       // 处理自定义属性
-      if (categoryData.custom_properties) {
+      if (categoryData.attribute) {
         try {
-          const props = JSON.parse(categoryData.custom_properties)
+          const props = categoryData.attribute
           customProperties.value = Object.entries(props).map(([key, value]) => ({ key, value }))
         } catch (e) {
           console.error('解析自定义属性失败:', e)
@@ -255,100 +319,6 @@ const removeProperty = (index) => {
   customProperties.value.splice(index, 1)
 }
 
-// 上传图标前检查
-const beforeIconUpload = (file) => {
-  const isImage = file.type.startsWith('image/')
-  const isLt2M = file.size / 1024 / 1024 < 2
-
-  if (!isImage) {
-    ElMessage.error('只能上传图片文件!')
-    return false
-  }
-  if (!isLt2M) {
-    ElMessage.error('图片大小不能超过 2MB!')
-    return false
-  }
-  return true
-}
-
-// 上传图标
-const uploadIcon = async (options) => {
-  try {
-    const formData = new FormData()
-    formData.append('file', options.file)
-
-    const loading = ElLoading.service({
-      lock: true,
-      text: '上传中...',
-      background: 'rgba(0, 0, 0, 0.7)'
-    })
-
-    const response = await http.post('/api/v1/upload/image', formData)
-    loading.close()
-
-    if (response.data && response.data.url) {
-      categoryForm.icon = response.data.url
-      ElMessage.success('图标上传成功')
-    } else {
-      ElMessage.error('图标上传失败')
-    }
-  } catch (error) {
-    ElMessage.error('图标上传失败: ' + error.message)
-  }
-}
-
-// 删除图标
-const removeIcon = () => {
-  categoryForm.icon = ''
-}
-
-// 上传图片前检查
-const beforeImageUpload = (file) => {
-  const isImage = file.type.startsWith('image/')
-  const isLt5M = file.size / 1024 / 1024 < 5
-
-  if (!isImage) {
-    ElMessage.error('只能上传图片文件!')
-    return false
-  }
-  if (!isLt5M) {
-    ElMessage.error('图片大小不能超过 5MB!')
-    return false
-  }
-  return true
-}
-
-// 上传图片
-const uploadImage = async (options) => {
-  try {
-    const formData = new FormData()
-    formData.append('file', options.file)
-
-    const loading = ElLoading.service({
-      lock: true,
-      text: '上传中...',
-      background: 'rgba(0, 0, 0, 0.7)'
-    })
-
-    const response = await http.post('/api/v1/upload/image', formData)
-    loading.close()
-
-    if (response.data && response.data.url) {
-      categoryForm.image = response.data.url
-      ElMessage.success('图片上传成功')
-    } else {
-      ElMessage.error('图片上传失败')
-    }
-  } catch (error) {
-    ElMessage.error('图片上传失败: ' + error.message)
-  }
-}
-
-// 删除图片
-const removeImage = () => {
-  categoryForm.image = ''
-}
-
 // 富文本内容变更
 const handleContentChange = (html) => {
   categoryForm.content = html
@@ -370,11 +340,9 @@ const submitForm = async () => {
     }
   })
 
-  // 构建提交数据
-  const submitData = {
-    ...categoryForm,
-    custom_properties: JSON.stringify(customPropertiesObj)
-  }
+  // 构建提交数据 - 不需要包含iconList和imageList
+  const { iconList, imageList, ...submitData } = categoryForm
+  submitData.attribute = customPropertiesObj
 
   try {
     loading.value = true
@@ -391,7 +359,7 @@ const submitForm = async () => {
     if (response.data) {
       ElMessage.success(isEdit.value ? '更新成功' : '添加成功')
       // 返回列表页
-      router.push('/shop/products/categories')
+      // router.push('/shop/products/categories')
     } else {
       ElMessage.error(isEdit.value ? '更新失败' : '添加失败')
     }
@@ -418,6 +386,12 @@ onMounted(async () => {
     await fetchCategoryDetail()
   }
 })
+
+// 获取选中分类名称
+const getSelectedCategoryName = () => {
+  const selected = parentCategories.value.find(cat => cat.id === categoryForm.parent_id)
+  return selected ? selected.name : ''
+}
 </script>
 
 <style scoped>
@@ -483,13 +457,36 @@ onMounted(async () => {
 .form-select {
   width: 100%;
   max-width: 400px;
-  height: 32px;
-  line-height: 32px;
-  padding: 0 12px;
   border: 1px solid #dcdfe6;
   border-radius: 4px;
   color: #606266;
   background-color: #fff;
+  padding: 0;
+  font-size: 14px;
+}
+
+.form-select option {
+  padding: 8px 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.form-select option.level-0 {
+  font-weight: bold;
+  color: #303133;
+  padding-left: 12px;
+}
+
+.form-select option.level-1 {
+  color: #606266;
+  padding-left: 28px;
+}
+
+.form-select option.level-2 {
+  color: #909399;
+  font-size: 13px;
+  padding-left: 44px;
 }
 
 .input-with-hint {
@@ -503,10 +500,9 @@ onMounted(async () => {
   margin-top: 4px;
 }
 
-.upload-container {
-  display: flex;
-  gap: 15px;
-  align-items: center;
+.upload-wrapper {
+  width: 100%;
+  max-width: 400px;
 }
 
 .preview-container {
@@ -608,5 +604,17 @@ onMounted(async () => {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.select-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+.selected-display {
+  margin-top: 5px;
+  font-size: 13px;
+  color: #409eff;
 }
 </style>

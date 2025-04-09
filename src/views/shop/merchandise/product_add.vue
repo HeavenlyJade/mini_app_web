@@ -452,8 +452,8 @@
 
         <!-- 提交按钮 -->
         <div class="form-footer">
-          <button type="button" class="btn btn-cancel">取消</button>
-          <button type="submit" class="btn btn-submit">提交</button>
+          <button type="button" class="btn btn-cancel" @click="cancel">返回</button>
+          <button v-if="!isViewMode" type="submit" class="btn btn-submit">提交</button>
         </div>
       </form>
     </div>
@@ -479,6 +479,7 @@ export default {
       productId: null,
       isEdit: false,
       loading: false,
+      isViewMode: false,
 
       // 表单数据
       formData: {
@@ -544,6 +545,8 @@ export default {
   created () {
     this.productId = this.$route.params.id || this.$route.query.id
     this.isEdit = !!this.productId
+    this.isViewMode = this.$route.query.mode === 'view'
+
   },
   mounted () {
     // 加载基础数据

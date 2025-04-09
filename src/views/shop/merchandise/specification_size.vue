@@ -372,14 +372,15 @@ export default {
     },
 
     // 标签页点击事件
-    handleTabClick() {
-      // 重置选中行
+    handleTabClick(tab) {
       this.selectedRows = [];
       this.hasSelected = false;
       
-      // 获取当前选中标签页对应的规格ID
-      if (this.activeTab !== undefined && this.specData[this.activeTab]) {
-        this.fetchAttributesBySpecId(this.specData[this.activeTab].id);
+      // 通过索引获取正确的ID
+      const tabIndex = parseInt(tab.paneName || this.activeTab);
+      if (tabIndex >= 0 && this.specData[tabIndex]) {
+        console.log(`请求ID: ${this.specData[tabIndex].id}, 名称: ${this.specData[tabIndex].name}`);
+        this.fetchAttributesBySpecId(this.specData[tabIndex].id);
       }
     },
 

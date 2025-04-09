@@ -140,12 +140,12 @@ export default {
     async fetchReasonList() {
       this.loading = true
       try {
-        const response = await http.get('/api/v1/mini_core/shop-return-reason', {
-          params: {
+        const response = await http.get('/api/v1/mini_core/shop-return-reason', 
+       {
             page: this.currentPage,
             size: this.pageSize
           }
-        })
+        )
         if (response.data && response.data.code === 200) {
           this.reasonList = response.data.data
           this.total = response.data.total

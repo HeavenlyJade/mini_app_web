@@ -58,7 +58,7 @@
 
 <script>
 import { ref, watch } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElLoading } from 'element-plus';
 import draggable from 'vuedraggable';
 // 导入 Element Plus 图标
 import { Plus, Delete, ZoomIn, Rank } from '@element-plus/icons-vue';

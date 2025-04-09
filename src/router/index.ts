@@ -95,10 +95,26 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: "订单配置" },
       },
       {
+        path: "/orders/returns",
+        name: "order_reasons",
+        component: () => import("@/views/order/order_return.vue"),
+        meta: { title: "订单退货原因" },
+      },
+      {
         path: "/orders/return-reasons",
         name: "return-reasons",
         component: () => import("@/views/order/return_reason.vue"),
         meta: { title: "订单退货原因" },
+      },
+      // 在您的router/index.js或相关路由配置文件中
+      {
+        path: '/order/return/detail/',
+        name: 'OrderReturnDetail',
+        component: () => import('@/views/order/order_return_detail.vue'),
+        meta: {
+          title: '退货申请详情',
+          requiresAuth: true
+        }
       },
       {
         path: "/distribution/user_list",

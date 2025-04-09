@@ -1,5 +1,10 @@
 <template>
+  
   <div class="page-container">
+    <div class="page-header">
+            <h2 class="page-title">订单详情</h2>
+        </div>
+
     <div v-if="orderDetail && Object.keys(orderDetail).length > 0" class="page-content">
       <!-- 基本信息区域 -->
       <div class="detail-section">

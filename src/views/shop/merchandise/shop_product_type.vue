@@ -1,13 +1,17 @@
 <template>
-  <div class="category-list-container">
+  <div class="category-list-container" v-loading="loading" element-loading-text="加载中...">
     <!-- Action toolbar -->
+    <div class="page-header">
+      <h2 class="page-title">添加商品分类</h2>
+    </div>
+
     <div class="toolbar">
-      <el-select v-model="storeFilter" placeholder="门店" class="filter-item">
+      <!-- <el-select v-model="storeFilter" placeholder="门店" class="filter-item">
         <el-option label="全部门店" value="all"></el-option>
-      </el-select>
+      </el-select> -->
 
       <el-input
-        placeholder="搜索"
+        placeholder="搜索名称"
         v-model="searchKeyword"
         class="filter-item">
         <template #append>
@@ -64,9 +68,18 @@
       </el-table-column>
     </el-table>
 
-    <!-- Loading overlay -->
-    <div v-if="loading" class="loading-overlay">
-      <el-loading></el-loading>
+    <!-- 添加分页组件 -->
+    <div class="pagination-container">
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="totalCategories"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        background>
+      </el-pagination>
     </div>
   </div>
 </template>
@@ -90,26 +103,14 @@ const loading = ref(false)
 const isExpanded = ref(false)
 const categoryTableRef = ref(null)
 
+// 分页相关状态
+const currentPage = ref(1)
+const pageSize = ref(10)
+const totalCategories = ref(0)
+
 // 计算属性
 const filteredCategoryList = computed(() => {
-  let result = categoryList.value
-
-  // 按门店过滤（如果需要）
-  if (storeFilter.value && storeFilter.value !== 'all') {
-    result = result.filter(item => item.store_id === storeFilter.value)
-  }
-
-  // 按搜索关键字过滤
-  if (searchKeyword.value && searchKeyword.value.trim() !== '') {
-    const keyword = searchKeyword.value.toLowerCase()
-    result = result.filter(item =>
-      (item.name && item.name.toLowerCase().includes(keyword)) ||
-      (item.code && item.code.toLowerCase().includes(keyword)) ||
-      (item.type && item.type.toLowerCase().includes(keyword))
-    )
-  }
-
-  return result
+  return categoryList.value
 })
 
 // 生命周期钩子
@@ -120,30 +121,34 @@ onMounted(() => {
 // 方法
 const fetchCategoryData = () => {
   loading.value = true
-  http.get('/api/v1/mini_core/product-category')
+  
+  const params = {
+    page: currentPage.value,
+    size: pageSize.value,
+    need_total_count: true
+  }
+  
+  // 添加搜索条件
+  if (searchKeyword.value && searchKeyword.value.trim() !== '') {
+    params.keyword = searchKeyword.value.trim()
+  }
+  
+  http.get('/api/v1/mini_core/product-category', params)
     .then(response => {
-      console.log("API响应:", response)
-
-      // 直接使用response.data作为数据源
       if (response.data) {
-        // 检查是否是数组
-        if (Array.isArray(response.data)) {
-          categoryList.value = response.data
-        }
-        // 检查是否有data字段且是数组
-        else if (response.data.data && Array.isArray(response.data.data)) {
+        // 确保只处理data字段
+        if (response.data.data && Array.isArray(response.data.data)) {
           categoryList.value = response.data.data
-        }
-        // 其他情况
-        else {
+          totalCategories.value = response.data.total || 0
+          console.log("数据列表:", categoryList.value.length, "总数:", totalCategories.value)
+        } else if (Array.isArray(response.data)) {
+          categoryList.value = response.data
+          totalCategories.value = response.data.length
+        } else {
+          categoryList.value = []
           console.error('数据格式不符合预期:', response.data)
-          ElMessage.error('获取分类数据失败：数据格式不符合预期')
         }
-      } else {
-        ElMessage.error('获取分类数据失败：响应为空')
       }
-
-      console.log("处理后的分类列表:", categoryList.value)
     })
     .catch(error => {
       console.error('获取分类数据错误:', error)
@@ -155,8 +160,8 @@ const fetchCategoryData = () => {
 }
 
 const handleSearch = () => {
-  // 搜索已通过计算属性处理
-  console.log('搜索关键字:', searchKeyword.value)
+  currentPage.value = 1 // 重置到第一页
+  fetchCategoryData()
 }
 
 const handleAdd = () => {
@@ -243,6 +248,17 @@ const handleExpandAll = () => {
 const handleSelectionChange = (val) => {
   selectedCategories.value = val
 }
+
+// 分页处理函数
+const handleSizeChange = (newSize) => {
+  pageSize.value = newSize
+  fetchCategoryData()
+}
+
+const handleCurrentChange = (newPage) => {
+  currentPage.value = newPage
+  fetchCategoryData()
+}
 </script>
 
 <style scoped>
@@ -268,16 +284,10 @@ const handleSelectionChange = (val) => {
   object-fit: contain;
 }
 
-.loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.7);
+/* 添加分页样式 */
+.pagination-container {
+  margin-top: 20px;
   display: flex;
   justify-content: center;
-  align-items: center;
-  z-index: 999;
 }
 </style>

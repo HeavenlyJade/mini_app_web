@@ -22,19 +22,65 @@
               <div class="dropdown-item" @click="handleBatchAction('delete')">批量删除</div>
             </div>
           </div>
-          <button class="btn btn-danger" @click="rebuildSort">
+          <!-- <button class="btn btn-danger" @click="rebuildSort">
             <i class="refresh-icon"></i> 重建排序
-          </button>
+          </button> -->
         </div>
 
         <div class="right-actions">
-          <div class="search-wrapper">
-            <input link class="search-input" placeholder="商品名称/编号/关键词" v-model="searchQuery"
-              @focus="showSearchDropdown = true" @blur="onSearchBlur" @keyup.enter="searchProducts" />
-            <button class="search-btn" @click="searchProducts">
-              <i class="search-icon"></i>
-            </button>
-
+          <div class="search-form">
+            <!-- 商品分类下拉框 -->
+            <div class="search-item">
+              <select v-model="searchCategoryId" class="search-select">
+                <option :value="null">所有分类</option>
+                <option v-for="category in categories" :key="category.id" :value="category.id">
+                  {{ category.name }}
+                </option>
+              </select>
+            </div>
+            
+            <!-- 商品名称搜索框 -->
+            <div class="search-item">
+              <input 
+                class="search-input" 
+                placeholder="商品名称" 
+                v-model="searchName"
+                @keyup.enter="searchProducts"
+              />
+            </div>
+            
+            <!-- 商品编号搜索框 -->
+            <div class="search-item">
+              <input 
+                class="search-input" 
+                placeholder="商品编号" 
+                v-model="searchCode"
+                @keyup.enter="searchProducts"
+              />
+            </div>
+            
+            <!-- 商品条码搜索框 -->
+            <div class="search-item">
+              <input 
+                class="search-input" 
+                placeholder="商品条码" 
+                v-model="searchBarcode"
+                @keyup.enter="searchProducts"
+              />
+            </div>
+            
+            <!-- 按钮组 -->
+            <div class="search-buttons">
+              <!-- 搜索按钮 -->
+              <button class="search-btn" @click="searchProducts">
+                <i class="search-icon"></i>
+              </button>
+              
+              <!-- 清空按钮 -->
+              <button class="clear-btn" @click="clearSearchFields">
+                <i class="clear-icon"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -114,14 +160,14 @@
                 </span>
               </td>
               <td class="actions-col">
-                <button class="btn-icon edit" @click="handleEdit(product)">
-                  <i class="edit-icon"></i>
+                <button class="btn-action edit" @click="handleEdit(product)">
+                  编辑
                 </button>
-                <button class="btn-icon view" @click="handleView(product)">
-                  <i class="view-icon"></i>
+                <button class="btn-action view" @click="handleView(product)">
+                  查看
                 </button>
-                <button class="btn-icon delete" @click="handleDelete(product)">
-                  <i class="delete-icon"></i>
+                <button class="btn-action delete" @click="handleDelete(product)">
+                  删除
                 </button>
               </td>
             </tr>
@@ -166,140 +212,172 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import http from '@/utils/http'
 import { loadStoreCategories } from '@/utils/store'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { WarningFilled } from '@element-plus/icons-vue'
+import { markRaw } from 'vue'
 
 export default {
   name: 'ProductList',
-  setup() {
-    // 路由
-    const router = useRouter()
+  data() {
+    return {
+      // 搜索和下拉
+      searchName: null,        // 商品名称搜索
+      searchCode: null,        // 商品编号搜索
+      searchBarcode: null,     // 商品条码搜索
+      searchCategoryId: null,  // 商品分类搜索
+      showSearchDropdown: false,
+      showBatchMenu: false,
 
-    // 搜索和下拉
-    const searchQuery = ref('')
-    const showSearchDropdown = ref(false)
-    const showBatchMenu = ref(false)
+      // 状态变量
+      loading: false,
+      productList: [],
+      categories: [],
+      error: null,
 
-    // 状态变量
-    const loading = ref(false)
-    const productList = ref([])
-    const categories = ref([])
-    const error = ref(null)
+      // 统计数据
+      stats: {
+        views: 0,
+        favorites: 0,
+        orders: 0,
+        sales: 0,
+        satisfaction: 0,
+        likes: 0,
+        dislikes: 0
+      },
 
-    // 统计数据
-    const stats = ref({
-      views: 0,
-      favorites: 0,
-      orders: 0,
-      sales: 0,
-      satisfaction: 0,
-      likes: 0,
-      dislikes: 0
-    })
+      // 状态标签
+      statusTabs: [
+        { label: '全部', value: null },
+        { label: '上架商品', value: '上架' },
+        { label: '下架商品', value: '下架' },
+      ],
+      activeTab: null,
 
-    // 延迟关闭搜索下拉
-    const onSearchBlur = () => {
-      setTimeout(() => {
-        showSearchDropdown.value = false
-      }, 200)
+      // 选择商品
+      selectAll: false,
+      selectedProducts: [],
+      categoryOptions: [],
+
+      // 分页
+      totalProducts: 0,
+      currentPage: 1,
+      pageSize: 10,
+      jumpToPage: ''
     }
+  },
+  computed: {
+    // 总页数
+    totalPages() {
+      return Math.ceil(this.totalProducts / this.pageSize) || 1
+    },
 
-    // 状态标签
-    const statusTabs = [
-      {
-        label: '全部',
-        value: 'all'
-      },
-      {
-        label: '销售中',
-        value: 'selling'
-      },
-      {
-        label: '已售罄',
-        value: 'soldout'
-      },
-      {
-        label: '仓库中',
-        value: 'stored'
+    // 显示的页码
+    displayPages() {
+      let start = Math.max(1, this.currentPage - 2)
+      let end = Math.min(this.totalPages, start + 4)
+
+      // 调整起始页，确保显示5个页码或全部页码
+      if (end - start + 1 < 5 && this.totalPages >= 5) {
+        start = Math.max(1, end - 4)
       }
-    ]
-    const activeTab = ref('all')
 
-    // 选择商品
-    const selectAll = ref(false)
-    const selectedProducts = ref([])
-    const categoryOptions = ref([])
-
-    // 分页
-    const totalProducts = ref(0)
-    const currentPage = ref(1)
-    const pageSize = ref(10)
-    const jumpToPage = ref('')
+      return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+    }
+  },
+  watch: {
+    // 监听选中项变化同步全选状态
+    selectedProducts(newVal) {
+      const validProducts = this.productList.filter(p => p.id !== undefined && p.id !== null)
+      this.selectAll = newVal.length > 0 && newVal.length === validProducts.length
+    }
+  },
+  mounted() {
+    this.fetchProducts()
+    this.fetchCategories()
+    this.loadBaseData()
+  },
+  methods: {
+    // 延迟关闭搜索下拉
+    onSearchBlur() {
+      setTimeout(() => {
+        this.showSearchDropdown = false
+      }, 200)
+    },
 
     // 获取商品列表
-    const fetchProducts = async () => {
-      loading.value = true
-      error.value = null
+    async fetchProducts() {
+      this.loading = true
+      this.error = null
 
       try {
         const params = {
-          page: currentPage.value,
-          size: pageSize.value,
-          keyword: searchQuery.value,
-          status: activeTab.value === 'all' ? '' : activeTab.value
+          page: this.currentPage,
+          size: this.pageSize,
+          name: this.searchName,
+          code: this.searchCode,
+          barcode: this.searchBarcode,
+          category_id: this.searchCategoryId,
+          status:  this.activeTab,
+          need_total_count: true,
         }
 
         const response = await http.get('/api/v1/mini_core/shop-product', params)
 
         if (response.data && response.data.code === 200) {
-          productList.value = response.data.data
-          totalProducts.value = response.data.total
+          this.productList = response.data.data
+          this.totalProducts = response.data.total
 
           // 清空选择
-          selectedProducts.value = []
-          selectAll.value = false
+          this.selectedProducts = []
+          this.selectAll = false
         } else {
-          error.value = '获取商品列表失败'
+          this.error = '获取商品列表失败'
           console.error('获取商品列表返回错误:', response.data)
         }
       } catch (err) {
-        error.value = '获取商品列表出错'
+        this.error = '获取商品列表出错'
         console.error('获取商品列表错误:', err)
       } finally {
-        loading.value = false
+        this.loading = false
       }
-    }
+    },
 
     // 获取分类列表
-    const fetchCategories = async () => {
+    async fetchCategories() {
       try {
-        const response = await http.get('/api/v1/mini_core/product-category')
+        const params = {page:0,size:1000}
+        const response = await http.get('/api/v1/mini_core/product-category',params)
         if (response.data && response.data.data) {
-          categories.value = response.data.data
+          this.categories = response.data.data
         }
       } catch (err) {
         console.error('获取分类列表错误:', err)
       }
-    }
-    const loadBaseData = async () => {
-      categoryOptions.value = await loadStoreCategories()
-    }
-    const getStoreName = (storeId) => {
+    },
+
+    // 加载基础数据
+    async loadBaseData() {
+      this.categoryOptions = await loadStoreCategories()
+    },
+
+    // 获取门店名称
+    getStoreName(storeId) {
       if (!storeId) return '-'
-      const store = categoryOptions.value.find(store => store.value === String(storeId))
+      const store = this.categoryOptions.find(store => store.value === String(storeId))
       return store ? store.label : '-'
-    }
+    },
+
     // 获取分类名称
-    const getCategoryName = (categoryId) => {
+    getCategoryName(categoryId) {
       if (!categoryId) return '-'
-      const category = categories.value.find(cat => cat.id === categoryId)
+      const category = this.categories.find(cat => cat.id === categoryId)
       return category ? category.name : '-'
-    }
+    },
 
     // 获取商品第一张图片
-    const getFirstImage = (images) => {
+    getFirstImage(images) {
       if (!images) return ''
       try {
         // 尝试解析JSON字符串
@@ -315,10 +393,10 @@ export default {
         console.error('解析商品图片错误:', err)
       }
       return ''
-    }
+    },
 
     // 获取状态类名
-    const getStatusClass = (status) => {
+    getStatusClass(status) {
       switch (status) {
         case 'selling':
         case '上架':
@@ -332,10 +410,10 @@ export default {
         default:
           return 'unknown'
       }
-    }
+    },
 
     // 获取状态文本
-    const getStatusText = (status) => {
+    getStatusText(status) {
       switch (status) {
         case 'selling':
           return '上架'
@@ -346,88 +424,64 @@ export default {
         default:
           return status || '未知'
       }
-    }
+    },
 
     // 切换全选
-    const toggleSelectAll = () => {
-      if (selectAll.value) {
-        selectedProducts.value = productList.value.map(item => item.id).filter(Boolean)
+    toggleSelectAll() {
+      if (this.selectAll) {
+        this.selectedProducts = this.productList.map(item => item.id).filter(Boolean)
       } else {
-        selectedProducts.value = []
+        this.selectedProducts = []
       }
-    }
-
-    // 监听选中项变化同步全选状态
-    watch(selectedProducts, (newVal) => {
-      const validProducts = productList.value.filter(p => p.id !== undefined && p.id !== null)
-      selectAll.value = newVal.length > 0 && newVal.length === validProducts.length
-    })
-
-    // 总页数
-    const totalPages = computed(() => {
-      return Math.ceil(totalProducts.value / pageSize.value) || 1
-    })
-
-    // 显示的页码
-    const displayPages = computed(() => {
-      let start = Math.max(1, currentPage.value - 2)
-      let end = Math.min(totalPages.value, start + 4)
-
-      // 调整起始页，确保显示5个页码或全部页码
-      if (end - start + 1 < 5 && totalPages.value >= 5) {
-        start = Math.max(1, end - 4)
-      }
-
-      return Array.from({ length: end - start + 1 }, (_, i) => start + i)
-    })
+    },
 
     // 切换状态标签
-    const changeTab = (tabValue) => {
-      activeTab.value = tabValue
-      currentPage.value = 1
-      fetchProducts()
-    }
+    changeTab(tabValue) {
+      this.activeTab = tabValue
+      this.currentPage = 1
+      this.fetchProducts()
+    },
 
     // 搜索商品
-    const searchProducts = () => {
-      currentPage.value = 1
-      fetchProducts()
-    }
+    searchProducts() {
+      this.currentPage = 1
+      this.fetchProducts()
+    },
 
     // 改变页码
-    const changePage = (page) => {
-      if (page >= 1 && page <= totalPages.value) {
-        currentPage.value = page
-        fetchProducts()
+    changePage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page
+        this.fetchProducts()
       }
-    }
+    },
 
     // 改变每页显示数量
-    const handlePageSizeChange = () => {
-      currentPage.value = 1
-      fetchProducts()
-    }
+    handlePageSizeChange() {
+      this.currentPage = 1
+      this.fetchProducts()
+    },
 
     // 跳转页码
-    const jumpTo = () => {
-      if (jumpToPage.value) {
-        const page = parseInt(jumpToPage.value)
-        if (!isNaN(page) && page >= 1 && page <= totalPages.value) {
-          changePage(page)
+    jumpTo() {
+      if (this.jumpToPage) {
+        const page = parseInt(this.jumpToPage)
+        if (!isNaN(page) && page >= 1 && page <= this.totalPages) {
+          this.changePage(page)
         }
-        jumpToPage.value = ''
+        this.jumpToPage = ''
       }
-    }
+    },
 
     // 切换批量操作菜单
-    const toggleBatchMenu = () => {
-      showBatchMenu.value = !showBatchMenu.value
-    }
+    toggleBatchMenu() {
+      this.showBatchMenu = !this.showBatchMenu
+    },
 
     // 批量操作
-    const handleBatchAction = async (action) => {
-      if (selectedProducts.value.length === 0) {
-        alert('请选择要操作的商品')
+    async handleBatchAction(action) {
+      if (this.selectedProducts.length === 0) {
+        ElMessage.warning('请选择要操作的商品')
         return
       }
 
@@ -444,13 +498,22 @@ export default {
           break
       }
 
-      if (confirm(`确认${actionText}选中的 ${selectedProducts.value.length} 个商品吗?`)) {
+      ElMessageBox.confirm(
+        `确认${actionText}选中的 ${this.selectedProducts.length} 个商品吗?`,
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          icon: markRaw(WarningFilled),
+        }
+      ).then(async () => {
         try {
-          loading.value = true
+          this.loading = true
 
           // 构建请求参数
           const params = {
-            ids: selectedProducts.value,
+            ids: this.selectedProducts,
             action: action
           }
 
@@ -458,127 +521,124 @@ export default {
           const response = await http.post('/api/v1/mini_core/shop-product/batch', params)
 
           if (response.data && response.data.code === 0) {
-            alert(`批量${actionText}成功!`)
+            ElMessage.success(`批量${actionText}成功!`)
             // 刷新数据
-            fetchProducts()
+            this.fetchProducts()
           } else {
-            alert(`批量${actionText}失败: ${response.data.message || '未知错误'}`)
+            ElMessage.error(`批量${actionText}失败: ${response.data.message || '未知错误'}`)
           }
         } catch (err) {
           console.error(`批量${actionText}错误:`, err)
-          alert(`批量${actionText}出错: ${err.message || '网络错误'}`)
+          ElMessage.error(`批量${actionText}出错: ${err.message || '网络错误'}`)
         } finally {
-          loading.value = false
-          showBatchMenu.value = false
+          this.loading = false
+          this.showBatchMenu = false
         }
-      }
-    }
+      }).catch(() => {
+        ElMessage.info(`已取消${actionText}操作`)
+      })
+    },
 
     // 重建排序
-    const rebuildSort = async () => {
-      if (confirm('确认要重建商品排序吗?')) {
+    rebuildSort() {
+      // 使用 Element Plus 的 MessageBox 替代原生 confirm
+      ElMessageBox.confirm(
+        '重建排序后，列表记录将按照创建重新设置排序字段，确定要操作吗？',
+        '提示',
+        {
+          confirmButtonText: '提交',
+          cancelButtonText: '取消',
+          type: 'warning',
+          icon: markRaw(WarningFilled), // 使用警告图标
+          draggable: true, // 允许拖动
+        }
+      )
+      .then(async () => {
         try {
-          loading.value = true
-
-          const response = await http.post('/api/v1/mini_core/shop-product/rebuild-sort')
+          this.loading = true
+          const params = {
+          page: this.currentPage,
+          size: this.pageSize,
+          need_total_count: true,
+          ordering:["-create_time"]
+        }
+          const response = await http.post('/api/v1/mini_core/shop-product/shop-product')
 
           if (response.data && response.data.code === 0) {
-            alert('重建排序成功!')
+            this.productList = response.data.data
+            this.totalProducts = response.data.total
             // 刷新数据
-            fetchProducts()
+            this.fetchProducts()
           } else {
-            alert(`重建排序失败: ${response.data.message || '未知错误'}`)
+            ElMessage.error(`重建排序失败: ${response.data.message || '未知错误'}`)
           }
         } catch (err) {
           console.error('重建排序错误:', err)
-          alert(`重建排序出错: ${err.message || '网络错误'}`)
+          ElMessage.error(`重建排序出错: ${err.message || '网络错误'}`)
         } finally {
-          loading.value = false
+          this.loading = false
         }
-      }
-    }
+      })
+      .catch(() => {
+        // 用户点击取消按钮
+        ElMessage.info('已取消重建排序')
+      })
+    },
 
     // 编辑商品
-    const handleEdit = (product) => {
-      router.push(`/shop/products/add?id=${product.id}`)
-    }
+    handleEdit(product) {
+      this.$router.push(`/shop/products/add?id=${product.id}`)
+    }, 
 
     // 查看商品
-    const handleView = (product) => {
-      router.push(`/shop/products/add?id=${product.id}&mode=view`)
-    }
+    handleView(product) {
+      this.$router.push(`/shop/products/add?id=${product.id}&mode=view`)
+    },
 
     // 删除商品
-    const handleDelete = async (product) => {
-      if (confirm(`确认删除商品 "${product.name || '未命名商品'}" 吗?`)) {
+    handleDelete(product) {
+      ElMessageBox.confirm(
+        `确认删除商品 "${product.name || '未命名商品'}" 吗?`,
+        '删除确认',
+        {
+          confirmButtonText: '删除',
+          cancelButtonText: '取消',
+          type: 'warning',
+          icon: markRaw(WarningFilled),
+        }
+      ).then(async () => {
         try {
-          loading.value = true
-
+          this.loading = true
           const response = await http.delete(`/api/v1/mini_core/shop-product/${product.id}`)
 
           if (response.data && response.data.code === 0) {
-            alert('删除成功!')
+            ElMessage.success('删除成功!')
             // 刷新数据
-            fetchProducts()
+            this.fetchProducts()
           } else {
-            alert(`删除失败: ${response.data.message || '未知错误'}`)
+            ElMessage.error(`删除失败: ${response.data.message || '未知错误'}`)
           }
         } catch (err) {
           console.error('删除商品错误:', err)
-          alert(`删除出错: ${err.message || '网络错误'}`)
+          ElMessage.error(`删除出错: ${err.message || '网络错误'}`)
         } finally {
-          loading.value = false
+          this.loading = false
         }
-      }
-    }
+      }).catch(() => {
+        ElMessage.info('已取消删除')
+      })
+    },
 
-    // 初始化
-    onMounted(() => {
-      fetchProducts()
-      fetchCategories()
-      loadBaseData()
-    })
-
-    return {
-      // 状态变量
-      loading,
-      productList,
-      error,
-      searchQuery,
-      showSearchDropdown,
-      showBatchMenu,
-      stats,
-      statusTabs,
-      activeTab,
-      selectAll,
-      selectedProducts,
-      totalProducts,
-      currentPage,
-      pageSize,
-      jumpToPage,
-      totalPages,
-      displayPages,
-
-      // 方法
-      onSearchBlur,
-      toggleSelectAll,
-      changeTab,
-      searchProducts,
-      changePage,
-      handlePageSizeChange,
-      jumpTo,
-      toggleBatchMenu,
-      handleBatchAction,
-      rebuildSort,
-      handleEdit,
-      handleView,
-      handleDelete,
-      getCategoryName,
-      getFirstImage,
-      getStatusClass,
-      getStatusText,
-      loadBaseData,
-      getStoreName
+    // 清空所有搜索字段
+    clearSearchFields() {
+      this.searchName = null
+      this.searchCode = null
+      this.searchBarcode = null
+      this.searchCategoryId = null
+      
+      // 重置状态标签为"全部"
+      this.activeTab = null
+    
     }
   }
 }
@@ -671,51 +731,80 @@ export default {
   }
 }
 
-.search-wrapper {
-  position: relative;
+.search-form {
   display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
-.search-input {
-  width: 200px;
+.search-item {
+  position: relative;
+}
+
+.search-input, 
+.search-select {
+  width: 150px;
   padding: 8px 12px;
   border: 1px solid #dcdfe6;
-  border-radius: 4px 0 0 4px;
+  border-radius: 4px;
   outline: none;
-
+  font-size: 14px;
+  
   &:focus {
     border-color: #409eff;
   }
 }
 
-.search-btn {
+.search-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.search-btn, 
+.clear-btn {
+  height: 38px;
   border: 1px solid #dcdfe6;
-  border-left: none;
-  background-color: #f5f7fa;
-  padding: 8px 15px;
-  border-radius: 0 4px 4px 0;
-  cursor: pointer;
-}
-
-.search-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 200px;
-  background-color: white;
-  border: 1px solid #eee;
   border-radius: 4px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-  margin-top: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 15px;
 }
 
-.search-stat-item {
-  padding: 8px 12px;
-  border-bottom: 1px solid #f0f0f0;
+.search-btn {
+  background-color: #409eff;
+  color: white;
+  
+  &:hover {
+    background-color: #66b1ff;
+  }
+}
 
-  &:last-child {
-    border-bottom: none;
+.clear-btn {
+  background-color: #f56c6c;
+  color: white;
+  
+  &:hover {
+    background-color: #f78989;
+  }
+}
+
+/* 自定义图标 */
+.clear-icon::before {
+  content: "×";
+  font-size: 16px;
+  font-weight: bold;
+}
+
+@media (max-width: 1200px) {
+  .search-form {
+    flex-wrap: wrap;
+  }
+  
+  .search-item {
+    flex: 1;
+    min-width: 150px;
   }
 }
 
@@ -855,26 +944,39 @@ export default {
     display: block;
   }
 
-  .btn-icon {
-    width: 24px;
-    height: 24px;
-    border: none;
-    background: none;
-    cursor: pointer;
+  .btn-action {
+    padding: 4px 8px;
     margin: 0 2px;
-    padding: 0;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 12px;
+    color: white;
+    transition: all 0.2s;
+  }
 
-    &.edit {
-      color: #409eff;
-    }
+  .btn-action.edit {
+    background-color: #409eff;
+  }
 
-    &.view {
-      color: #67c23a;
-    }
+  .btn-action.edit:hover {
+    background-color: #66b1ff;
+  }
 
-    &.delete {
-      color: #f56c6c;
-    }
+  .btn-action.view {
+    background-color: #67c23a;
+  }
+
+  .btn-action.view:hover {
+    background-color: #85ce61;
+  }
+
+  .btn-action.delete {
+    background-color: #f56c6c;
+  }
+
+  .btn-action.delete:hover {
+    background-color: #f78989;
   }
 }
 
