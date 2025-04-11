@@ -175,6 +175,13 @@ const routes: Array<RouteRecordRaw> = [
         name: 'employee_namecards',
         component: () => import('@/views/employee/employee_namecard_manage.vue'),
         meta: { title: '员工名片管理' }
+      },
+      // 在MainLayout的children数组中添加
+      {
+        path: '/employee/manage',
+        name: 'employee_manage',
+        component: () => import('@/views/permissions/shop_user_manage.vue'),
+        meta: { title: '员工管理' }
       }
     ],
   },

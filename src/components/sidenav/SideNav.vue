@@ -228,7 +228,7 @@ const menuItems = ref([
       {
         title: '用户列表',
         icon: 'user-icon',
-        path: '/permissions/users'
+        path: '/employee/manage'
       },
       {
         title: '用户地址',
