@@ -24,6 +24,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: "首页" }, // 添加页面标题，会显示在顶部栏
       },
       {
+        path: '/marketing/banner',
+        name: 'banner_management',
+        component: () => import('@/views/marketing/banner_management.vue'),
+        meta: { title: 'Banner管理' }
+      },
+      {
         path: "/shop/store_category/list",
         name: "store_type",
         component: () => import("@/views/shop/store/store_category_manage.vue"),

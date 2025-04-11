@@ -80,6 +80,11 @@ const menuItems = ref([
     title: '商品',
     icon: 'product-icon',
     children: [
+    {
+        title: 'Banner管理',
+        icon: 'list-icon',
+        path: '/marketing/banner'
+      },
       {
         title: '门店分类管理',
         icon: 'list-icon',

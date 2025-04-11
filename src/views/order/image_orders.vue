@@ -2,7 +2,7 @@
     <div class="page-container">
         <!-- 页面头部 -->
         <div class="page-header">
-            <h2 class="page-title">图片订单管理</h2>
+            <h2 class="page-title">订单管理</h2>
         </div>
 
         <!-- 订单状态选项卡 -->
@@ -95,6 +95,17 @@
                         </el-tag>
                     </template>
                 </el-table-column>
+                <el-table-column prop="payment_status" label="支付状态" width="120">
+                    <template #default="scope">
+                        <!-- 在模板中 -->
+                        <el-tag :class="{ 'custom-primary': scope.row.payment_statusstatus }"
+                            :type="getStatusType(scope.row.status) === 'primary' ? '' : getStatusType(scope.row.status)">
+                            {{ scope.row.payment_status }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
+             
+
                 <el-table-column label="操作" width="200" fixed="right">
                     <template #default="scope">
                         <el-button link size="small" @click="handleView(scope.row)">查看订单</el-button>

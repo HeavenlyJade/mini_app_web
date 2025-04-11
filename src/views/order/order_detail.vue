@@ -204,7 +204,7 @@ export default {
           this.orderDetail = response.data.order_info
 
           // 设置商品列表
-          this.productList = response.data.order_details || []
+          this.productList = response.data.order_details 
 
           // 设置操作日志
           this.operationLogs = this.formatOperationLogs(response.data.order_logs)
