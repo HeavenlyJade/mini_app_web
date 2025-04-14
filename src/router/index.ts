@@ -188,6 +188,12 @@ const routes: Array<RouteRecordRaw> = [
         name: 'employee_manage',
         component: () => import('@/views/permissions/shop_user_manage.vue'),
         meta: { title: '员工管理' }
+      },
+      {
+        path: 'permissions/roles',
+        name: 'permissions_roles',
+        component: () => import('@/views/employee/user_role.vue'),
+        meta: { title: '角色管理' }
       }
     ],
   },
