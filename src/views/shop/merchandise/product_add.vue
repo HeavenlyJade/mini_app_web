@@ -90,12 +90,12 @@
               <label><span class="required">*</span> 海外直邮</label>
               <div class="radio-group">
                 <label class="radio-item">
-                  <input type="radio" v-model="formData.overseas" value="yes">
+                  <input type="radio" v-model="formData.support_overseas_shipping" value="yes">
                   <span class="radio-circle"></span>
                   <span class="radio-text">支持</span>
                 </label>
                 <label class="radio-item">
-                  <input type="radio" v-model="formData.overseas" value="no" checked>
+                  <input type="radio" v-model="formData.support_overseas_shipping" value="no" checked>
                   <span class="radio-circle"></span>
                   <span class="radio-text">不支持</span>
                 </label>
@@ -107,7 +107,7 @@
             <div class="form-item">
               <label>标签(关键词)</label>
               <div class="input-with-tip">
-                <input link v-model="formData.tags" placeholder="标签/关键词">
+                <input link v-model="formData.keywords" placeholder="标签/关键词">
                 <div class="input-tip">多个标签用逗号隔开</div>
               </div>
             </div>
@@ -128,7 +128,7 @@
           <div class="form-row">
             <div class="form-item">
               <label>购买须知</label>
-              <textarea v-model="formData.purchaseNotes" class="text-area"
+              <textarea v-model="formData.purchase_notice" class="text-area"
                         placeholder="购买须知，最多500个字"></textarea>
               <div class="char-count">最多500个</div>
             </div>
@@ -149,7 +149,7 @@
             <div class="form-item">
               <label>选择物流模板</label>
               <div class="select-wrapper">
-                <select v-model="formData.logisticsTemplate">
+                <select v-model="formData.freight_template_id">
                   <option value="">包邮</option>
                   <option value="template1">按件收费</option>
                   <option value="template2">按重量收费</option>
@@ -166,7 +166,7 @@
             <div class="form-item">
               <label>扩展物流模板</label>
               <div class="select-wrapper">
-                <select v-model="formData.extendedLogisticsTemplate">
+                <select v-model="formData.extend_freight_template_id">
                   <option value="">请选择</option>
                   <!-- 更多选项 -->
                 </select>
@@ -179,7 +179,7 @@
             <div class="form-item">
               <label><span class="required">*</span> 优先券</label>
               <div class="input-with-tip">
-                <input link v-model="formData.priorityCoupon" required>
+                <input link v-model="formData.discount" required>
                 <div class="input-tip orange-tip">最多可使用1张优惠券</div>
               </div>
             </div>
@@ -188,7 +188,7 @@
           <div class="form-row">
             <div class="form-item">
               <label>排序</label>
-              <input link v-model="formData.sort" placeholder="0">
+              <input link v-model="formData.sort_order" placeholder="0">
             </div>
           </div>
 
@@ -197,12 +197,12 @@
               <label>推荐</label>
               <div class="radio-group">
                 <label class="radio-item">
-                  <input type="radio" v-model="formData.recommended" value="no" checked>
+                  <input type="radio" v-model="formData.is_recommended" value="no" checked>
                   <span class="radio-circle"></span>
                   <span class="radio-text">不推荐</span>
                 </label>
                 <label class="radio-item">
-                  <input type="radio" v-model="formData.recommended" value="yes">
+                  <input type="radio" v-model="formData.is_recommended" value="yes">
                   <span class="radio-circle"></span>
                   <span class="radio-text">推荐</span>
                 </label>
@@ -215,12 +215,12 @@
               <label>是否展示</label>
               <div class="radio-group">
                 <label class="radio-item">
-                  <input type="radio" v-model="formData.display" value="yes" checked>
+                  <input type="radio" v-model="formData.display_mode" value="normal" checked>
                   <span class="radio-circle"></span>
                   <span class="radio-text">正常展示</span>
                 </label>
                 <label class="radio-item">
-                  <input type="radio" v-model="formData.display" value="no">
+                  <input type="radio" v-model="formData.display_mode" value="hidden">
                   <span class="radio-circle"></span>
                   <span class="radio-text">默认隐藏，不在前端展示</span>
                 </label>
@@ -233,17 +233,17 @@
               <label>是否售后</label>
               <div class="checkbox-group">
                 <label class="checkbox-item">
-                  <input type="checkbox" v-model="formData.afterSaleOptions" value="exchange">
+                  <input type="checkbox" v-model="formData.services" value="exchange">
                   <span class="checkbox-square"></span>
                   <span class="checkbox-text">仅换货</span>
                 </label>
                 <label class="checkbox-item">
-                  <input type="checkbox" v-model="formData.afterSaleOptions" value="return">
+                  <input type="checkbox" v-model="formData.services" value="return">
                   <span class="checkbox-square"></span>
                   <span class="checkbox-text">退款/退货</span>
                 </label>
                 <label class="checkbox-item">
-                  <input type="checkbox" v-model="formData.afterSaleOptions" value="repair">
+                  <input type="checkbox" v-model="formData.services" value="repair">
                   <span class="checkbox-square"></span>
                   <span class="checkbox-text">换修</span>
                 </label>
@@ -257,12 +257,12 @@
               <label><span class="required">*</span> 状态</label>
               <div class="radio-group">
                 <label class="radio-item">
-                  <input type="radio" v-model="formData.status" value="上架" checked>
+                  <input type="radio" v-model="formData.status" value="online" checked>
                   <span class="radio-circle"></span>
                   <span class="radio-text">上架</span>
                 </label>
                 <label class="radio-item">
-                  <input type="radio" v-model="formData.status" value="下架">
+                  <input type="radio" v-model="formData.status" value="offline">
                   <span class="radio-circle"></span>
                   <span class="radio-text">下架</span>
                 </label>
@@ -277,7 +277,7 @@
             <div class="form-item">
               <label>视频地址</label>
               <div class="input-with-tip">
-                <input link v-model="formData.videoUrl" placeholder="https://...">
+                <input link v-model="formData.video_url" placeholder="https://...">
                 <div class="input-tip orange-tip">必须是mp4的地址</div>
               </div>
             </div>
@@ -302,7 +302,7 @@
               <label>详细介绍</label>
               <div class="editor-container">
                 <rich-text-editor
-                  v-model:value="formData.description"
+                  v-model:value="formData.detail"
                   placeholder="请输入商品详细介绍..."
                   :height="300"
                 />
@@ -328,10 +328,8 @@
               <label><span class="required">*</span> 市场价</label>
               <input
                 link
-                v-model.number="formData.marketPrice"
-                @input="validateNumericInput"
+                v-model.number="formData.market_price"
                 required
-                placeholder="0"
               >
             </div>
           </div>
@@ -339,7 +337,7 @@
           <div class="form-row">
             <div class="form-item">
               <label><span class="required">*</span> 价格</label>
-              <input link v-model="formData.price" required placeholder="0">
+              <input link v-model="formData.price" required>
             </div>
           </div>
 
@@ -347,7 +345,7 @@
             <div class="form-item">
               <label>税率</label>
               <div class="input-with-tip">
-                <input link v-model="formData.taxRate" placeholder="0">
+                <input link v-model="formData.tax_rate" placeholder="0">
                 <div class="input-tip">例如增值税6%</div>
               </div>
             </div>
@@ -357,7 +355,7 @@
             <div class="form-item">
               <label><span class="required">*</span> 需要积分</label>
               <div class="input-with-tip">
-                <input link v-model="formData.requiredPoints" required placeholder="0">
+                <input link v-model="formData.points_required" required placeholder="0">
                 <div class="input-tip">购买需要扣除用户的积分数量</div>
               </div>
             </div>
@@ -367,9 +365,9 @@
             <div class="form-item">
               <label><span class="required">*</span> 赠送积分</label>
               <div class="points-input-group">
-                <input link v-model="formData.giftPoints" required placeholder="0">
+                <input link v-model="formData.points_reward" required placeholder="0">
                 <div class="select-wrapper small">
-                  <select v-model="formData.giftPointsType">
+                  <select v-model="formData.points_reward_type">
                     <option value="fixed">固定数量积分</option>
                     <option value="percent">百分比积分</option>
                   </select>
@@ -384,7 +382,7 @@
             <div class="form-item">
               <label><span class="required">*</span> 最少购买</label>
               <div class="min-buy-input">
-                <input link v-model="formData.minPurchase" required placeholder="1">
+                <input link v-model="formData.min_purchase_qty" required placeholder="1">
                 <span class="unit-text">份</span>
               </div>
             </div>
@@ -401,7 +399,7 @@
             <div class="form-item">
               <label>库存预警</label>
               <div class="input-with-tip">
-                <input link v-model="formData.stockWarning" placeholder="0">
+                <input link v-model="formData.stock_alert" placeholder="0">
                 <div class="input-tip">库存低于该数量系统会告警</div>
               </div>
             </div>
@@ -412,10 +410,12 @@
               <label>库存设置</label>
               <div class="checkbox-group">
                 <label class="checkbox-item">
-                  <input type="checkbox" v-model="formData.stockSettings" value="autoOrder">
-                  <span class="checkbox-text">无库存自动下架</span>
-                  <span class="checkbox-square"></span>
-
+                  <input type="checkbox" v-model="formData.no_stock_mode">
+                  <span class="checkbox-text">无库存</span>
+                </label>
+                <label class="checkbox-item">
+                  <input type="checkbox" v-model="formData.auto_offline">
+                  <span class="checkbox-text">自动下架</span>
                 </label>
               </div>
             </div>
@@ -483,11 +483,7 @@ export default {
 
       // 表单数据
       formData: {
-        // 商店信息
-        store_id: '',
-        category_id: '',
-
-        // 商品基础信息
+        category_id: null,
         code: '',
         name: '',
         alias: '',
@@ -496,44 +492,35 @@ export default {
         keywords: '',
         purchase_notice: '',
         features: '',
-
-        // 物流和模板
-        freight_template_id: '',
-        extend_freight_template_id: '',
-        discount: '1',
-        sort_order: 0,
-        is_recommended: false,
-        display_mode: 'normal',
-        services: [],
-        status: 'online',
-
-        // 视频和图片
-        video_code: '',
-        video_url: '',
-        images: [],
-
-        // 商品详情
-        detail: '',
-
-        // 价格和库存
         unit: '份',
-        market_price: '',
-        price: '',
-        tax_rate: '',
+        weight: null,
+        market_price: null,
+        price: null,
+        tax_rate: null,
         points_required: 0,
         points_reward: 0,
         min_purchase_qty: 1,
-        stock: '',
-        stock_alert: '',
+        stock: null,
+        stock_alert: null,
         no_stock_mode: false,
         auto_offline: false,
-        weight: '',
-        member_card_id: '',
-
-        // 规格信息
-        specifications: [],
+        member_card_id: null,
+        freight_template_id: null,
+        extend_freight_template_id: null,
+        discount: null,
+        sort_order: 0,
+        is_recommended: false,
+        display_mode: 'normal',
+        status: 'online',
+        video_code: '',
+        video_url: '',
+        detail: '',
+        images: [],
+        specifications: null,
+        services: [],
         attributes: [],
-        spec_combinations: []
+        spec_combinations: null,
+        store_id: null
       },
 
       // 选项数据
@@ -572,7 +559,7 @@ export default {
         allowDecimal: true,
         decimalDigits: 2
       })
-      this.formData.marketPrice = result !== null ? result : ''
+      this.formData.market_price = result !== null ? result : ''
     },
 
     async fetchDowns () {
@@ -658,6 +645,16 @@ export default {
         this.formData.images = images
       }
     },
+    // 处理空字符串转 null 的工具函数
+    convertEmptyToNull(obj) {
+      const result = { ...obj };
+      Object.keys(result).forEach(key => {
+        if (result[key] === '') {
+          result[key] = null;
+        }
+      });
+      return result;
+    },
     // 提交表单
 
     async submitForm () {
@@ -689,29 +686,28 @@ export default {
         }
       })
 
-      this.loading = true
-      try {
-        let response
+      // 处理表单数据，将所有空字符串转换为 null
+      const submitData = this.convertEmptyToNull(this.formData);
 
+      this.loading = true;
+      try {
+        let response;
         if (this.isEdit) {
-          // 编辑模式
-          response = await http.put(`/api/v1/mini_core/shop-product/${this.productId}`, this.formData)
+          response = await http.put(`/api/v1/mini_core/shop-product/${this.productId}`, submitData);
         } else {
-          // 新增模式
-          response = await http.post('/api/v1/mini_core/shop-product', this.formData)
+          response = await http.post('/api/v1/mini_core/shop-product', submitData);
         }
 
         if (response.data && response.data.code === 200) {
-          ElMessage.success(this.isEdit ? '商品更新成功' : '商品添加成功')
-          this.$router.push('/shop/products/list')
+          ElMessage.success(this.isEdit ? '商品更新成功' : '商品添加成功');
         } else {
-          ElMessage.error(response.data?.message || '操作失败')
+          ElMessage.error(response.data?.message || '操作失败');
         }
       } catch (error) {
-        console.error('提交失败:', error)
-        ElMessage.error('提交失败: ' + (error.message || '未知错误'))
+        console.error('提交失败:', error);
+        ElMessage.error('提交失败: ' + (error.message || '未知错误'));
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
 

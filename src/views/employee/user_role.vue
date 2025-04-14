@@ -26,14 +26,6 @@
         <el-table :data="tableData" border v-loading="loading" style="width: 100%">
           <el-table-column prop="id" label="ID" width="80" />
           <el-table-column prop="role_number" label="角色编号" width="120" />
-          <el-table-column prop="access_level" label="访问级别" width="120" />
-          <el-table-column prop="areas" label="区域" width="150">
-            <template #default="scope">
-              <el-tag v-for="area in scope.row.areas" :key="area" style="margin-right: 5px">
-                {{ area }}
-              </el-tag>
-            </template>
-          </el-table-column>
           <el-table-column prop="creator" label="创建人" width="120" />
           <el-table-column prop="create_time" label="创建时间" width="180">
             <template #default="scope">
@@ -80,15 +72,6 @@
           <el-form-item label="角色编号" prop="role_number">
             <el-input v-model="roleForm.role_number" placeholder="请输入角色编号" />
           </el-form-item>
-          <el-form-item label="访问级别" prop="access_level">
-            <el-input-number v-model="roleForm.access_level" :min="0" />
-          </el-form-item>
-          <el-form-item label="区域" prop="areas">
-            <el-select v-model="roleForm.areas" multiple placeholder="请选择区域">
-              <el-option label="区域1" value="area1" />
-              <el-option label="区域2" value="area2" />
-            </el-select>
-          </el-form-item>
         </el-form>
         <template #footer>
           <span class="dialog-footer">
@@ -120,16 +103,11 @@
           creator: ''
         },
         roleForm: {
-          role_number: '',
-          access_level: 0,
-          areas: []
+          role_number: ''
         },
         rules: {
           role_number: [
             { required: true, message: '请输入角色编号', trigger: 'blur' }
-          ],
-          access_level: [
-            { required: true, message: '请输入访问级别', trigger: 'blur' }
           ]
         }
       }
@@ -183,9 +161,7 @@
       handleAdd() {
         this.dialogTitle = '新增角色'
         this.roleForm = {
-          role_number: '',
-          access_level: 0,
-          areas: []
+          role_number: ''
         }
         this.dialogVisible = true
       },
