@@ -72,7 +72,7 @@ export default {
       uploadedImages: [],
       // 默认插件配置
       plugins: [
-        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+        'advlist', 'autolink', 'lists', 'link',  'charmap',
         'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
         'fullscreen', 'insertdatetime', 'media', 'table', 'code',
         'help', 'wordcount', 'emoticons', 'autoresize', 'powerpaste',
@@ -141,51 +141,42 @@ export default {
 
         // 修复上传进度指示器问题的图片上传处理
         images_upload_handler: function(blobInfo, success, failure, progress) {
-          // 打印调试信息
-          console.log('处理文件:', blobInfo.filename());
-          console.log('文件类型:', blobInfo.blob().type);
-
-          try {
-            // 生成base64
-            const base64 = 'data:' + blobInfo.blob().type + ';base64,' + blobInfo.base64();
-
-            // 使用setTimeout模拟网络延迟
-            setTimeout(function() {
-              // 调用success回调，传入图片URL
-              success(base64);
-
-              // 手动查找并移除所有进度指示器元素
-              setTimeout(() => {
-                const editor = window.tinymce.get(self.tinymceId);
-                if (editor) {
-                  const editorBody = editor.getBody();
-                  // 查找所有可能的进度指示器
-                  const progressElements = editorBody.querySelectorAll(
+          // 创建FormData对象
+          const formData = new FormData();
+          formData.append('file', blobInfo.blob(), blobInfo.filename());
+          
+          // 隐藏上传指示器
+          window.tinymce.activeEditor.notificationManager.close();
+          
+          // 使用imageUploadHttp实例上传图片
+          import('@/utils/http').then(httpModule => {
+            httpModule.default.uploadImage(formData)
+              .then(response => {
+                // 根据实际接口返回结构调整
+                const imageUrl = response.data.url || response.data.data;
+                success(imageUrl);
+                
+                // 上传完成后，再次确保指示器被清除
+                setTimeout(() => {
+                  window.tinymce.activeEditor.notificationManager.close();
+                  
+                  // 清除所有可能的进度指示器
+                  const editorBody = window.tinymce.activeEditor.getBody();
+                  const indicators = editorBody.querySelectorAll(
                     '.mce-progress, .tox-progress-indicator, [data-mce-bogus="all"], .tox-progress, .mce-loader'
                   );
-
-                  // 逐个移除
-                  progressElements.forEach(element => {
-                    if (element && element.parentNode) {
-                      element.parentNode.removeChild(element);
+                  indicators.forEach(indicator => {
+                    if (indicator && indicator.parentNode) {
+                      indicator.parentNode.removeChild(indicator);
                     }
                   });
-
-                  // 刷新编辑器视图
-                  editor.focus();
-                  editor.nodeChanged();
-                }
-              }, 200);
-
-              console.log('图片处理成功并清理了进度指示器');
-            }, 500);
-
-            // 立即报告100%完成，尝试让TinyMCE自己清理指示器
-            progress(100);
-          } catch (error) {
-            console.error('图片处理失败:', error);
-            failure('图片处理失败: ' + error.message);
-          }
+                }, 100);
+              })
+              .catch(error => {
+                console.error('上传失败:', error);
+                failure('图片上传失败: ' + (error.message || '未知错误'));
+              });
+          });
         },
 
         // 文件选择器回调

@@ -674,9 +674,9 @@ export default {
           // 否则使用现有的 url
           return file.url
         })
-        this.formData.images = JSON.stringify(images)
+        this.formData.images = images
       } else {
-        this.formData.images = JSON.stringify([])
+        this.formData.images = []
       }
 
       // 处理其他需要字符串化的字段
